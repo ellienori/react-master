@@ -157,6 +157,54 @@ const Box = styled.div`
 
 그러면 스마일에는 hover 동작하지만 외계인에는 동작하지 않음
 
+### #2.7 Theme
+
+theme 설정하려면 우선 index.js에서 app을 themeprovider로 묶어야 함
+
+```
+import { ThemeProvider } from "styled-components";
+
+const darkTheme = {
+  textColor: "whitesmoke",
+  backgroundColor: "#111",
+};
+
+ReactDOM.render(
+  <React.StrictMode>
+    <ThemeProvider theme={darkTheme}>
+      <App />
+    </ThemeProvider>
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+```
+
+지금 App이 ThemeProvide로 묶여있고 darkTheme이 선택되어 있기 때문에
+App.js에서 props로 가져다 쓸 수 있음
+
+```
+const Title = styled.h1`
+  color: ${(props) => props.theme.textColor};
+`;
+
+const Wrapper = styled.div`
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  justify-content: center;
+  align-items: center;
+  background-color: ${(props) => props.theme.backgroundColor};
+`;
+
+function App() {
+  return (
+    <Wrapper>
+      <Title>Hi</Title>
+    </Wrapper>
+  );
+}
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
