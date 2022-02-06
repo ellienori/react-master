@@ -11,6 +11,39 @@ $ npx create-react-app react-master
 ```
 
 2. 그리고 VScode에서 해당 프로젝트 열고 App.js와 index.js 빼고 모두 지우기
+3. 그 이후로 서버 실행할 때마다 $ npm start 하면 된다.
+
+### #2.1~ Styled Component
+
+#### 설치
+
+```
+$ npm i styled-components
+```
+
+그리고 extension: vscode-styled-components
+
+#### 설정
+
+```
+import styled from "styled-components";
+```
+
+#### 사용
+
+```
+// Before
+<div style={{ dispaly: "flex" }}></div>
+
+// After
+const Fater = styled.div`
+  dispaly: flex;
+`;
+
+<Father></Father>
+```
+
+back tik 안에는 CSS 문법 쓰듯이 쓰면 된다.
 
 # Getting Started with Create React App
 
