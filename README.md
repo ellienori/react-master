@@ -75,6 +75,88 @@ const Input = styled.input.attrs({ required: true, minLength: 10 })`
 `;
 ```
 
+### #2.4 Animations and Pseudo selectors
+
+#### keyframes
+
+애니메이션 쓰려면 styled에서 keyframes라는 함수를 import 해야해
+
+```
+import styled, { keyframes } from "styled-components";
+
+const rotationAnimation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform:rotate(360deg);
+  }
+`;
+
+const Box = styled.div`
+  height: 200px;
+  width: 200px;
+  background-color: tomato;
+  animation: ${rotationAnimation} 1s linear infinite;
+`;
+```
+
+#### Component 내에 있는 애 스타일 설정하기
+
+아래처럼 Box안에 span을 만들었을 떄 span에 대한 스타일 설정을 Box에서 할 수 있어
+
+```
+<Box>
+  <span>😁</span>
+</Box>
+```
+
+참고로 span 안의 &:는 span 바깥에서 span:hover 한 거랑 같음
+
+```
+const Box = styled.div`
+  height: 200px;
+  width: 200px;
+  background-color: tomato;
+
+  span {
+    font-size: 40px;
+    &:hover {
+      font-size: 100px;
+    }
+  }
+`;
+```
+
+따로 선언한 다음에 안에서 호출할 수도 있어
+
+```
+const Emoji = styled.span`
+  font-size: 40px;
+`;
+
+const Box = styled.div`
+  height: 200px;
+  width: 200px;
+  background-color: tomato;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: ${rotationAnimation} 3s linear infinite;
+
+  ${Emoji}:hover {
+    font-size: 100px;
+  }
+`;
+
+<Box>
+  <Emoji>😁</Emoji>
+</Box>
+<Emoji>👽</Emoji>
+```
+
+그러면 스마일에는 hover 동작하지만 외계인에는 동작하지 않음
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
