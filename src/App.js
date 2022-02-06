@@ -4,20 +4,18 @@ const Fater = styled.div`
   dispaly: flex;
 `;
 
-const Btn = styled.button`
-  color: white;
+const Input = styled.input.attrs({ required: true, minLength: 10 })`
   background-color: tomato;
-  border: 0;
-  border-radius: 15px;
 `;
 
 function App() {
   return (
-    <Fater>
-      <Btn>Log in</Btn>
-      <Btn as="a" href="/">
-        Log in
-      </Btn>
+    <Fater as="header">
+      <Input />
+      <Input />
+      <Input />
+      <Input />
+      <Input />
     </Fater>
   );
 }

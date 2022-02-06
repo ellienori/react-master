@@ -45,6 +45,36 @@ const Fater = styled.div`
 
 back tik 안에는 CSS 문법 쓰듯이 쓰면 된다.
 
+### #2.3~ As and Attrs
+
+#### As
+
+이미 만들어 놓은 컴포넌트를 다른 애(?)로 쓸 때 사용
+예를 들어 div로 선언 된 Father를 아래처럼 선안하면 header로 쓸 수 있다.
+
+```
+<Fater as="header">
+```
+
+그 외에 button으로 만든 애를 a로 쓰는 것도 가능
+
+#### Attrs
+
+Attributes의 줄임말임
+컴포넌트에 속성을 주고 싶을 때 똑같이 styled를 사용해서 줄 수 있음
+
+```
+// Before
+<Input required minLength=10 />
+<Input required minLength=10 />
+<Input required minLength=10 />
+
+// After
+const Input = styled.input.attrs({ required: true, minLength: 10 })`
+  background-color: tomato;
+`;
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
