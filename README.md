@@ -1,3 +1,17 @@
+# Studylog
+
+## #2. Styled Components
+
+### #2.0~ Setting the project
+
+1. create-react-app으로 프로젝트 생성하기
+
+```
+$ npx create-react-app react-master
+```
+
+2. 그리고 VScode에서 해당 프로젝트 열고 App.js와 index.js 빼고 모두 지우기
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
