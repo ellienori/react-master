@@ -1,48 +1,23 @@
 import styled, { keyframes } from "styled-components";
 
-const Father = styled.div`
-  display: flex;
+const Title = styled.h1`
+  color: ${(props) => props.theme.textColor};
 `;
 
-const rotation = keyframes`
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(360deg);
-    background-color: yellow;
-    border-radius: 100px;
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-`;
-
-const Box = styled.div`
-  background-color: tomato;
-  height: 200px;
-  width: 200px;
-  animation: ${rotation} 2s linear infinite;
-
+const Wrapper = styled.div`
   display: flex;
+  height: 100vh;
+  width: 100vw;
   justify-content: center;
   align-items: center;
-  
-  span {
-    font-size: 40px;
-    &:hover {
-      font-size: 100px;
-    }
-  }
+  background-color: ${(props) => props.theme.backgroundColor};
 `;
 
 function App() {
   return (
-    <Father>
-      <Box>
-        <span>😄</span>
-      </Box>
-    </Father>
+    <Wrapper>
+      <Title>Hello</Title>
+    </Wrapper>
   );
 }
 
