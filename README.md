@@ -92,34 +92,28 @@ const Circle = styled(Box)`
 ```
 ## As and Attrs
 ### As
-이미 만들어 놓은 컴포넌트를 다른 애(?)로 쓸 때 사용
-예를 들어 div로 선언 된 Father를 아래처럼 선안하면 header로 쓸 수 있다.
-
+* 이미 만들어 놓은 컴포넌트를 다른 html로 쓸 때 사용
+```js
+<Btn>Login</Btn>
+<Btn as="a" href="">Login</Btn>
 ```
-<Fater as="header">
-```
-
-그 외에 button으로 만든 애를 a로 쓰는 것도 가능
-
+* button으로 만든 Btn을 button으로 사용하지 않고 그 스타일만 가져와서 a로 바꿀 수 있다
 ### Attrs
-
-Attributes의 줄임말임
-컴포넌트에 속성을 주고 싶을 때 똑같이 styled를 사용해서 줄 수 있음
-
+* Attributes의 줄임말임
+* 컴포넌트에 속성을 주고 싶을 때 똑같이 styled를 사용해서 줄 수 있음
+#### Before
+```js
+<Input required minLength=10 />
+<Input required minLength=10 />
+<Input required minLength=10 />
 ```
-// Before
-<Input required minLength=10 />
-<Input required minLength=10 />
-<Input required minLength=10 />
-
-// After
+#### After
+```js
 const Input = styled.input.attrs({ required: true, minLength: 10 })`
   background-color: tomato;
 `;
 ```
-
-## #2.4 Animations and Pseudo selectors
-
+## Animations and Pseudo selectors
 ### keyframes
 
 애니메이션 쓰려면 styled에서 keyframes라는 함수를 import 해야해
