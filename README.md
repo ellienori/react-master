@@ -1,54 +1,97 @@
-# Studylog
-
-## #2. Styled Components
-
-### #2.0~ Setting the project
-
+# Styled Components
+## Setting the project
 1. create-react-app으로 프로젝트 생성하기
-
-```
+```bash
 $ npx create-react-app react-master
 ```
-
 2. 그리고 VScode에서 해당 프로젝트 열고 App.js와 index.js 빼고 모두 지우기
 3. 그 이후로 서버 실행할 때마다 $ npm start 하면 된다.
 
-### #2.1~ Styled Component
-
-#### 설치
-
-```
+## Styled Component
+### 설치
+```bash
 $ npm i styled-components
 ```
+그리고 vscode extension: vscode-styled-components
 
-그리고 extension: vscode-styled-components
-
-#### 설정
-
-```
+### 설정
+```js
 import styled from "styled-components";
 ```
 
-#### 사용
-
+### 사용
+#### Before
+```js
+<div style={{display: "flex"}}>
+  <div style={{backgroundColor: "teal", width: 100, height: 100 }}></div>
+  <div style={{backgroundColor: "tomato", width: 100, height: 100 }}></div>
+</div>
 ```
-// Before
-<div style={{ dispaly: "flex" }}></div>
 
-// After
-const Fater = styled.div`
-  dispaly: flex;
+#### After
+```js
+import styled from "styled-components";
+
+const Father = styled.div`
+  display: flex;
 `;
 
-<Father></Father>
+const BoxOne = styled.div`
+  background-color: teal;
+  width: 100px;
+  height: 100px;
+`;
+
+const BoxTwo = styled.div`
+  background-color: tomato;
+  width: 100px;
+  height: 100px;
+`;
+
+function App() {
+  return (
+    <Father>
+      <BoxOne />
+      <BoxTwo />
+    </Father>
+  );
+}
+```
+__back tik__ 안에는 __CSS 문법__ 쓰듯이 쓰면 된다.
+
+### Props로 속성 넘기기
+```js
+const Box = styled.div`
+  background-color: ${props => props.bgColor};
+  width: 100px;
+  height: 100px;
+`;
+
+function App() {
+  return (
+    <Father>
+      <Box bgColor="teal" />
+      <Box bgColor="tomato" />
+    </Father>
+  );
+}
 ```
 
-back tik 안에는 CSS 문법 쓰듯이 쓰면 된다.
+### 확장하기
+* Box로 부터 모든 요소를 확장함
+```js
+const Box = styled.div`
+  background-color: ${props => props.bgColor};
+  width: 100px;
+  height: 100px;
+`;
 
-### #2.3~ As and Attrs
-
-#### As
-
+const Circle = styled(Box)`
+  border-radius: 50px;
+`;
+```
+## As and Attrs
+### As
 이미 만들어 놓은 컴포넌트를 다른 애(?)로 쓸 때 사용
 예를 들어 div로 선언 된 Father를 아래처럼 선안하면 header로 쓸 수 있다.
 
@@ -58,7 +101,7 @@ back tik 안에는 CSS 문법 쓰듯이 쓰면 된다.
 
 그 외에 button으로 만든 애를 a로 쓰는 것도 가능
 
-#### Attrs
+### Attrs
 
 Attributes의 줄임말임
 컴포넌트에 속성을 주고 싶을 때 똑같이 styled를 사용해서 줄 수 있음
@@ -75,9 +118,9 @@ const Input = styled.input.attrs({ required: true, minLength: 10 })`
 `;
 ```
 
-### #2.4 Animations and Pseudo selectors
+## #2.4 Animations and Pseudo selectors
 
-#### keyframes
+### keyframes
 
 애니메이션 쓰려면 styled에서 keyframes라는 함수를 import 해야해
 
@@ -101,7 +144,7 @@ const Box = styled.div`
 `;
 ```
 
-#### Component 내에 있는 애 스타일 설정하기
+### Component 내에 있는 애 스타일 설정하기
 
 아래처럼 Box안에 span을 만들었을 떄 span에 대한 스타일 설정을 Box에서 할 수 있어
 
@@ -157,7 +200,7 @@ const Box = styled.div`
 
 그러면 스마일에는 hover 동작하지만 외계인에는 동작하지 않음
 
-### #2.7 Theme
+## #2.7 Theme
 
 theme 설정하려면 우선 index.js에서 app을 themeprovider로 묶어야 함
 
