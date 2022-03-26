@@ -115,47 +115,50 @@ const Input = styled.input.attrs({ required: true, minLength: 10 })`
 ```
 ## Animations and Pseudo selectors
 ### keyframes
-
-애니메이션 쓰려면 styled에서 keyframes라는 함수를 import 해야해
-
-```
+* 애니메이션 쓰려면 styled에서 keyframes라는 함수를 import 해야해
+```js
 import styled, { keyframes } from "styled-components";
 
-const rotationAnimation = keyframes`
-  from {
+const rotation = keyframes`
+  0% {
     transform: rotate(0deg);
   }
-  to {
-    transform:rotate(360deg);
+  50% {
+    transform: rotate(360deg);
+    background-color: yellow;
+    border-radius: 100px;
+  }
+  100% {
+    transform: rotate(0deg);
   }
 `;
 
 const Box = styled.div`
+  background-color: tomato;
   height: 200px;
   width: 200px;
-  background-color: tomato;
-  animation: ${rotationAnimation} 1s linear infinite;
+  animation: ${rotation} 2s linear infinite;
 `;
 ```
-
 ### Component 내에 있는 애 스타일 설정하기
-
-아래처럼 Box안에 span을 만들었을 떄 span에 대한 스타일 설정을 Box에서 할 수 있어
-
-```
+* 아래처럼 Box안에 span을 만들었을 떄 span에 대한 스타일 설정을 Box에서 할 수 있어
+```js
 <Box>
   <span>😁</span>
 </Box>
 ```
-
-참고로 span 안의 &:는 span 바깥에서 span:hover 한 거랑 같음
-
-```
+* 참고로 span 안의 &:는 span 바깥에서 span:hover 한 거랑 같음
+```js
 const Box = styled.div`
+  background-color: tomato;
   height: 200px;
   width: 200px;
-  background-color: tomato;
+  animation: ${rotation} 2s linear infinite;
 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
   span {
     font-size: 40px;
     &:hover {
@@ -165,9 +168,8 @@ const Box = styled.div`
 `;
 ```
 
-따로 선언한 다음에 안에서 호출할 수도 있어
-
-```
+* 따로 선언한 다음에 안에서 호출할 수도 있어
+```js
 const Emoji = styled.span`
   font-size: 40px;
 `;
@@ -191,7 +193,6 @@ const Box = styled.div`
 </Box>
 <Emoji>👽</Emoji>
 ```
-
 그러면 스마일에는 hover 동작하지만 외계인에는 동작하지 않음
 
 ## #2.7 Theme
