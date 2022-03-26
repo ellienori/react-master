@@ -237,3 +237,104 @@ function App() {
   );
 }
 ```
+
+# TYPESCRIPT
+## What is it?
+* JS와 syntax가 같다. + 추가되는 내용
+* __strongly-typed__: 프로그래밍 언어가 동작하기 전에 데이터 타입을 확인한다는 의미
+```ts
+const plus = (a:number, b:number) => a+b;
+```
+
+## Project Setting
+### 추천 방법
+> npm create-react-app my-app --template typescript
+새로 프로젝트를 생성하는 것이 좋다.
+
+### 하지만 난 프로젝트 유지해볼래
+1. package 설치
+```bash
+$ npm install -D typescript @types/node @types/react @types/react-dom @types/jest @types/styled-components
+```
+2. .js -> .tsx extension 변경
+3. 처음에는 빨간줄이 많다가 1분 정도 지나면 사라질 겁니다
+4. nico github에 있는 소스를 참고해서 tsconfig.json + react-app-env.d.ts 파일을 추가합니다.
+5. 서버 재시작
+
+## Prop에 type 설정하기
+### interface
+* object를 설명해주는 애
+* prop types와 다른 점은 proptypes은 코드 실행 후에 잡아주지만 interface는 실행 전에 가르쳐준다.
+```tsx
+interface ContainerProps {
+  bgColor: string
+}
+
+const Container = styled.div<ContainerProps>`
+  width: 200px;
+  height: 200px;
+  background-color: ${props => props.bgColor};
+  border-radius: 100px;
+`;
+
+interface CircleProps {
+  bgColor: string
+};
+
+function Circle({bgColor}: CircleProps) {
+  return (
+    <Container bgColor={bgColor}/>
+  );
+}
+```
+
+### 예시
+* playerObj의 이름을 받아서 인사하는 함수를 만들자
+```tsx
+const sayHello = (playerObj) => `Hello, ${playerObj.name}`;
+```
+* playerObj에 type이 주어지지 않았다고 밑줄이 그어짐
+* playerObj를 위한 interface를 만들고 적용하자
+```tsx
+interface PlayerShape {
+  name: string;
+  age: number;
+}
+const sayHello = (playerObj:PlayerShape) => `Hello, ${playerObj.name}`;
+```
+
+## interface를 optional 주기
+### interface에 물음표로 타입 설정
+```tsx
+interface CircleProps {
+  bgColor: string;
+  borderColor?: string;
+}
+```
+
+### 인자가 없으면 default로 배경 색깔과 같아라
+```tsx
+function Circle({bgColor, borderColor}: CircleProps) {
+  return (
+    <Container bgColor={bgColor} borderColor={borderColor ?? bgColor}/>
+  );
+}
+```
+
+### default를 주는 또 다른 방법
+* props param 자체에서 줄 수도 있다
+```tsx
+interface CircleProps {
+  bgColor: string;
+  borderColor?: string;
+  text?: string;
+}
+
+function Circle({bgColor, borderColor, text = "🐝"}: CircleProps) {
+  return (
+    <Container bgColor={bgColor} borderColor={borderColor ?? bgColor}>
+      {text}
+    </Container>
+  );
+}
+```
