@@ -761,3 +761,70 @@ const Tab = styled.span<{ isActive: boolean }>`
   </Tab>
 </Tabs>
 ```
+
+## React Query
+### Setup
+#### 설치
+> npm i react-query
+* react query는 우리가 우리 스스로 실행하고 있었던 로직들을 축약해준다.
+#### QueryClient
+* index.tsx에 설정한다.
+```tsx
+import { QueryClient } from "react-query";
+
+const queryClient = new QueryClient();
+
+ReactDOM.render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </QueryClientProvider>
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+```
+* 기존에 있던 ThemeProvide를 QueryClientProvider로 감싸준다.
+
+### routes/api.tsx
+* API 관련 함수는 여기에 생성하도록 한다.
+
+### Coin.tsx
+> const {isLoading, data} = useQuery(identifier, 함수);
+* identifier는 우리가 임의로 unique하게 지정
+* 두번째 argument는 함수를 넣는다.
+  + 우리가 __fetchCoins__ 라는 함수를 만들었는데 async-await을 쓰지 않고 json promise를 출력하도록 만듦
+* 그리고 useQuery는 boolean으로 출력되는 isLoading과 함수의 리턴값을 가지고 온다.
+```tsx
+const {isLoading, data} = useQuery<ICoin[]>("allCoins", fetchCoins);
+```
+
+### ReactQueryDevtools
+* App.tsx에 import 하고 사용
+```tsx
+import { ReactQueryDevtools } from "react-query/devtools";
+// 중략
+function App() {
+  return (
+    <>
+      <GlobalStyle />
+      <Router />
+      <ReactQueryDevtools initialIsOpen={true} />
+    </>
+  );
+}
+```
+* react query는 데이터를 캐시에 가지고 있다.
+* 한번 가져온 데이터는 또 loading 안함
+
+### Coin.tsx
+* api.tsx에 관련 function 생성
+```tsx
+const {isLoading: infoLoading, data: infoData} = useQuery<InfoData>(["info", coinId], () => fetchCoinInfo(coinId));
+const {isLoading: tickersLoading, data: tickersData} = useQuery<PriceData>(["tickers", coinId], () => fetchCoinTickers(coinId));
+const loading = infoLoading || tickersLoading;
+```
+* ```isLoading: infoLoading```라고 쓰면 isLoading라는 값을 infoLoading라고 사용할 수 있다.
+* useQuery의 첫번째 인자는 array로 넘어가기 때문에 info와 tickers를 구분하기 위해 array에 coin id도 함께 넘겼다.
+* useQuery의 두번째 인자에는 함수를 넣어야하는데 이번에는 __coinId__ 라는 parameter를 넘겨주기 위해 함수 형태를 유지하기 위해 arrow function 형태로 넣었다.
