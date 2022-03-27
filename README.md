@@ -338,3 +338,28 @@ function Circle({bgColor, borderColor, text = "🐝"}: CircleProps) {
   );
 }
 ```
+
+## Typescript and react state
+### state 값의 type을 2개로 지정하고 싶을 때
+```tsx
+const [value, setValue] = useState<number|string>(1);
+```
+
+### Form
+#### input의 change event의 type
+```tsx
+const onChange = (event: React.FormEvent<HTMLInputElement>) => {
+  const {
+    currentTarget: { value }
+  } = event;
+  setValue(value);
+};
+```
+
+### form의 submit event의 type
+```tsx
+const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  console.log(`Hello, ${value}.`);
+};
+```
