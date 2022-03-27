@@ -421,3 +421,343 @@ function App() {
   );
 }
 ```
+
+# CRYPTO TRACKER
+## Set up
+### 패키지 설치
+```bash
+$ npm i react-query react-router-dom@5.3.0
+$ npm i --save-dev @types/react-router-dom
+```
+### routes/Coin.tsx and Coins.tsx
+* routes 안에 있는 tsx들이 스크린 역할을 한다.
+### Router.tsx
+```tsx
+import { BrowserRouter, Switch, Route } from "react-router-dom";
+import Coin from "./routes/Coin";
+import Coins from "./routes/Coins";
+
+function Router() {
+  return (
+    <BrowserRouter>
+      <Switch>
+      <Route path="/:coinId">
+          <Coin />
+        </Route>
+        <Route path="/">
+          <Coins />
+        </Route>
+      </Switch>
+    </BrowserRouter>
+  );
+}
+
+export default Router;
+```
+### App.tsx
+* Router를 등록한다.
+```tsx
+import Router from './Router';
+
+function App() {
+  return (
+    <Router />
+  );
+}
+```
+
+## useParams
+* 가져오는 Params 데이터의 타입도 interface로 지정해주어야 한다.
+```tsx
+interface Params {
+  coinId: string;
+}
+function Coin() {
+  const { coinId } = useParams<Params>();
+  console.log(coinId);
+  return <h1>Coin: {coinId}</h1>;
+}
+```
+
+## Style
+### createGlobalStyle
+#### 개념
+* 얘는 하나의 컴포넌트를 만들 수 있게 해주는데 렌더링 될 떄 그 컴포넌트는 global scope에 스타일을 올려준다.
+* 고립되지 않고 globally
+
+#### 사용
+```tsx
+const GlobalStyle = createGlobalStyle`
+  body {
+    color: red;
+  }
+`;
+
+function App() {
+  return (
+    <>
+      <GlobalStyle />
+      <Router />
+    </>
+  );
+}
+```
+* 모든 head에 해당 스타일을 주입한다.
+
+* __Fragment__: 일종의 유령 컴포넌트
+```tsx
+<></>
+```
+
+### reset css 설정
+* <https://github.com/zacanger/styled-reset/blob/master/src/index.ts>
+* GlobalStyle 방법으로 위의 reset을 적용한다.
+
+### Font
+* <https://fonts.google.com>
+* Source Sans Pro 폰트
+```css
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap');
+
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+}
+```
+
+### Flat UI Color
+* <https://flatuicolors.com/palette/gb>
+* 원하는 색을 theme.ts에 입력
+* App.tsx의 GolbalStyle에서 사용 가능
+```css
+body {
+  line-height: 1;
+  font-family: 'Source Sans Pro', sans-serif;
+  background-color: ${props => props.theme.bgColor};
+  color: ${props => props.theme.textColor};
+}
+```
+
+## Coins.tsx 페이지 다루기
+### 코인 데이터 가져오기
+#### interface 설정
+```tsx
+interface CoinInterface {
+  id: string;
+  name: string;
+  symbol: string;
+  rank: number;
+  is_new: boolean;
+  is_active: boolean;
+  type: string;
+}
+```
+* interface를 설정한 후에 해당 interface로 데이터 가져오겠다고 설정해야 함
+```tsx
+const [coins, setCoins] = useState<CoinInterface[]>([]);
+```
+#### fetch
+```tsx
+const [coins, setCoins] = useState<CoinInterface[]>([]);
+useEffect(() => {
+  (async() => {
+    const data = await fetch("https://api.coinpaprika.com/v1/coins");
+    const json = await data.json();
+    setCoins(json.slice(0,100));
+  })();
+}, []);
+```
+* useEffect로 데이터 가져올건데 async await 사용한다고 매번 함수 사용하기 귀찮으니 아래 방법을 사용함
+1. ```()();```라고 적는다.
+2. 앞의 괄호에 async 함수를 넣는다.
+```tsx
+(async() => {
+  
+})();
+```
+3. async 함수 안에 내용을 넣는다.
+```tsx
+useEffect(() => {
+  (async() => {
+    fetch("https://api.coinpaprika.com/v1/coins");
+  })();
+}, []);
+```
+* json으로 가져오는 array가 너무 길어서 중간에 자르기로 함
+```tsx
+setCoins(json.slice(0,100));
+```
+
+### Link 사용
+```tsx
+<Link to={`/${coin.id}`}>{coin.name} &rarr;</Link>
+```
+* 코인 이름을 누르면 페이지 이동하게 만듦
+* 유저에게 더 편하도록 styled에서 __padding__ 을 a에서 늘리면 (20px 지정) 굳이 이름을 클릭하지 않아도 그 주변에서 클릭 가능
+```tsx
+
+```
+### behind the scene 1
+* 우리에게 이미 데이터(name)가 있는데 link로 id만 넘겨서 또 데이터를 fetch 받아오면 사용자는 loading 페이지만 보고 있어야 하니까 뒤로 데이터를 넘겨주자
+```tsx
+<Link to={{
+  pathname: `/${coin.id}`,
+  state: {
+    name: coin.name,
+  }
+}}>
+```
+## Coin.tsx 페이지 다루기
+### behind the scene 2
+* Coin.tsx에서는 __useLocation()__ 으로 받는다.
+```tsx
+interface RouteState {
+  name: string;
+}
+function Coin() {
+  const [loading, setLoading] = useState(true);
+  const {coinId} = useParams<Params>();
+  const {state} = useLocation<RouteState>();
+  return (
+    <Container>
+      <Header>
+        <Title>{state?.name || "Loading.."}</Title>
+      </Header>
+  // 생략
+```
+* ```{state?.name || "Loading.."}``` 그 값이 있으면 띄우고 없으면 로딩이라 출력한다.
+### detail 데이터 가져오기
+* <https://api.coinpaprika.com/v1/coins/btc-bitcoin>
+* <https://api.coinpaprika.com/v1/tickers/btc-bitcoin>
+```tsx
+useEffect(() => {
+  (async() => {
+    const infoData = await (await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)).json();
+    const priceData = await (await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)).json();
+    setInfo(infoData);
+    setPrice(priceData);
+  })();
+}, [coinId]);
+```
+
+### javascript object의 type 한번에 가져오기
+* interface
+  + 참고: <https://app.quicktype.io/?l=ts>
+```tsx
+interface InfoInterface {
+  id: string;
+  name: string;
+  symbol: string;
+  rank: number;
+  is_new: boolean;
+  is_active: boolean;
+  type: string;
+  description: string;
+  message: string;
+  open_source: boolean;
+  started_at: string;
+  development_status: string;
+  hardware_wallet: boolean;
+  proof_type: string;
+  org_structure: string;
+  hash_algorithm: string;
+  first_data_at: string;
+  last_data_at: string;
+}
+
+interface PriceInterface {
+  id: string;
+  name: string;
+  symbol: string;
+  rank: number;
+  circulating_supply: number;
+  total_supply: number;
+  max_supply: number;
+  beta_value: number;
+  first_data_at: string;
+  last_updated: string;
+  quotes: {
+    USD: {
+      ath_date: string;
+      ath_price: number;
+      market_cap: number;
+      market_cap_change_24h: number;
+      percent_change_1h: number;
+      percent_change_1y: number;
+      percent_change_6h: number;
+      percent_change_7d: number;
+      percent_change_12h: number;
+      percent_change_15m: number;
+      percent_change_24h: number;
+      percent_change_30d: number;
+      percent_change_30m: number;
+      percent_from_price_ath: number;
+      price: number;
+      volume_24h: number;
+      volume_24h_change_24h: number;
+    };
+  };
+}
+
+function Coin() {
+  const [loading, setLoading] = useState(true);
+  const [info, setInfo] = useState<InfoInterface>();
+  const [price, setPrice] = useState<PriceInterface>();
+  // 중략
+  return (
+    // 중략
+        <Loader>
+          <span>{info?.description}</span>
+        </Loader>
+```
+
+### 데이터 출력하기
+* 으쌰으쌰함
+
+### price와 chart
+#### Coin.tsx에서 하나씩 보여주고 싶어
+```tsx
+<Switch>
+  <Route path={`/${coinId}/price`}>
+    <Price />
+  </Route>
+  <Route path={`/${coinId}/chart`}>
+    <Chart />
+  </Route>
+</Switch>
+```
+* 하나씩 보여주고 싶어서 __Swtich__ 사용
+* Chart와 Price는 routes 아래에 하나씩 생성
+
+#### 탭 만들기: __useRouteMatch__
+* 특정한 URL이 있는지 여부를 알려줌
+```tsx
+const priceMatch = useRouteMatch("/:coinId/price");
+const chartMatch = useRouteMatch("/:coinId/chart");
+```
+* 안에 입력한 링크에 우리가 들어와 있다면 object를 받는다.
+
+* Tab styled component에 __isActive prop__ 을 추가한다.
+  + isActive에 따라 color 값을 다르게 지정
+```tsx
+const Tab = styled.span<{ isActive: boolean }>`
+  text-align: center;
+  // 중략
+  color: ${(props) =>
+    props.isActive ? props.theme.accentColor : props.theme.textColor};
+  a {
+    display: block;
+  }
+`;
+```
+
+* Tab
+```tsx
+<Tabs>
+  <Tab isActive={chartMatch !== null}>
+    <Link to={`/${coinId}/chart`}>Chart</Link>
+  </Tab>
+  <Tab isActive={priceMatch !== null}>
+    <Link to={`/${coinId}/price`}>Price</Link>
+  </Tab>
+</Tabs>
+```
