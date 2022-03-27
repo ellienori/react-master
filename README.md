@@ -363,3 +363,61 @@ const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   console.log(`Hello, ${value}.`);
 };
 ```
+
+## Typescript and styled components theme
+### styled.d.ts 생성
+* <https://styled-components.com/docs/api#typescript>
+* 위의 링크 참고해서 형식 가져온 후 우리한테 맞게 변형
+```ts
+import 'styled-components';
+
+declare module 'styled-components' {
+  export interface DefaultTheme {
+    textColor: string;
+    bgColor: string;
+    btnColor: string;
+  }
+}
+```
+
+### theme.ts 생성
+```ts
+import { DefaultTheme } from "styled-components";
+
+export const lightTheme:DefaultTheme = {
+  bgColor: "whitesmoke",
+  textColor: "black",
+  btnColor: "tomato",
+}
+
+export const darkTheme:DefaultTheme = {
+  bgColor: "black",
+  textColor: "whitesmoke",
+  btnColor: "teal",
+}
+```
+
+### index에 themeprovider 적용
+```tsx
+<ThemeProvider theme={lightTheme}>
+  <App />
+</ThemeProvider>
+```
+
+### app에서 사용
+```tsx
+const Container = styled.div`
+  background-color: ${props => props.theme.bgColor};
+`;
+const H1 = styled.h1`
+  color: ${props => props.theme.textColor};
+`;
+
+function App() {
+  return (
+    <Container>
+      <H1>Protected</H1>
+    </Container>
+  );
+}
+```
