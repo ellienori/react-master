@@ -1027,4 +1027,44 @@ function Coins({toggleDark}: ICoinsProps) {
 * 위와 같은 방법으로 isDark를 -> Coin -> Chart로 보내준다.
 
 ## RECOIL
+### Understanding Recoil
 * ReactJS에서 사용할 수 있는 State management library
+* 기존에 recoil이 없으면 이렇게 작업 (심지어 interface 들도)
+> App(isDark) -> Router(isDark) -> Coin Screen(isDark) -> Chart(isDark)
+* recoil 사용하면 아래처럼 사용 가능
+> App <-- (isdark) --> Chart
+  + __atom__ 에 value를 저장하고 (여기서는 isDark) 그 atom을 필요한 컴포넌트에 다이렉트로 연결한다.
+
+### Setup
+> npm i recoil
+* 설치 후 theme 관련으로 생성한 useState 등 제거
+* index.tsx에서 ```<RecoilRoot></RecoilRoot>```로 감싼다.
+
+### isDark 연결
+#### atoms.ts 생성
+```ts
+import { atom } from "recoil";
+
+export const isDarkAtom = atom({
+  key: "isDark",
+  default: false,
+});
+```
+* key는 무조건 unique 해야 함
+
+#### App과 atoms 연결
+* App.tsx / Chart.tsx
+```tsx
+const isDark = useRecoilValue(isDarkAtom);
+```
+* 필요한 곳에 연결하면 된다.
+
+### isDark 값 바꾸기
+* Coins.tsx
+```tsx
+const setIsDark = useSetRecoilState(isDarkAtom);
+```
+* __useSetRecoilState__ 는 인자로 넘겨준 atom 값을 변경할 수 있는 setter를 리턴한다.
+```tsx
+<button onClick={() => setIsDark(prev => !prev)}>Toggle Mode</button>
+```
