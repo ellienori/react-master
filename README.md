@@ -963,3 +963,68 @@ const {isLoading: tickersLoading, data: tickersData} = useQuery<PriceData>(
   <title>{state?.name ? state.name : loading ? "Loading..." : infoData?.name}</title>
 </Helmet>
 ```
+
+# STATE MANAGEMENT
+## Understanding State Management
+### LightMode로 바꾸기
+* index.tsx의 Themprovider를 App으로 옮김
+* theme.tsx에서 darkTheme과 lightTheme 생성 후 App.tsx에서 import
+```tsx
+function App() {
+  const [isDark, setIsDark] = useState(false);
+  const toggleDark = () => setIsDark(cur => !cur);
+  return (
+    <>
+      <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
+        <button onClick={toggleDark}>Toggle Mode</button>
+        <GlobalStyle />
+        // 생략
+```
+### toggleDark를 App.tsx -> Coins.tsx로 보내기
+* App.tsx에서 Router를 통해 toggleDark를 보낸다.
+```tsx
+<Router toggleDark={toggleDark}/>
+```
+* Router.tsx에서 Interface 등록하고 Coins로 보낸다.
+```tsx
+nterface IRouterProps {
+  toggleDark: () => void;
+}
+
+function Router({toggleDark}: IRouterProps) {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route path="/:coinId">
+            <Coin />
+        </Route>
+        <Route path="/">
+          <Coins toggleDark={toggleDark}/>
+        </Route>
+        // 생략
+```
+* Coins.tsx에서 Interface 생성하고 인자로 받은 다음 사용
+```tsx
+interface ICoinsProps {
+  toggleDark: () => void;
+}
+
+function Coins({toggleDark}: ICoinsProps) {
+  const {isLoading, data} = useQuery<ICoin[]>("allCoins", fetchCoins);
+
+  return (
+    <Container>
+      <Helmet>
+        <Title>Coins</Title>
+      </Helmet>
+      <Header>
+        <Title>Coins</Title>
+        <button onClick={toggleDark}>Toggle Mode</button>
+      </Header>
+      // 생략
+```
+### Chart도 isDark에 따라 Light/Dark로 변경
+* 위와 같은 방법으로 isDark를 -> Coin -> Chart로 보내준다.
+
+## RECOIL
+* ReactJS에서 사용할 수 있는 State management library
