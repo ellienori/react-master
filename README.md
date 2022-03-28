@@ -818,7 +818,7 @@ function App() {
 * react query는 데이터를 캐시에 가지고 있다.
 * 한번 가져온 데이터는 또 loading 안함
 
-### Coin.tsx
+### Coin.tsx 메인
 * api.tsx에 관련 function 생성
 ```tsx
 const {isLoading: infoLoading, data: infoData} = useQuery<InfoData>(["info", coinId], () => fetchCoinInfo(coinId));
@@ -828,3 +828,138 @@ const loading = infoLoading || tickersLoading;
 * ```isLoading: infoLoading```라고 쓰면 isLoading라는 값을 infoLoading라고 사용할 수 있다.
 * useQuery의 첫번째 인자는 array로 넘어가기 때문에 info와 tickers를 구분하기 위해 array에 coin id도 함께 넘겼다.
 * useQuery의 두번째 인자에는 함수를 넣어야하는데 이번에는 __coinId__ 라는 parameter를 넘겨주기 위해 함수 형태를 유지하기 위해 arrow function 형태로 넣었다.
+
+## Chart
+### Chart로 coinId 보내기
+* props 사용 (Coin.tsx)
+```tsx
+<Route path={`/:coindId/chart`}>
+  <Chart coinId={coinId} />
+</Route>
+```
+* prop 받아오고 interface 설정 (Chart.tsx)
+```tsx
+interface ChartProps {
+  coinId: string;
+}
+
+function Chart({coinId}:ChartProps) {
+  return <h1>Chart</h1>;
+}
+```
+### api.tsx
+```tsx
+export function fetchCoinHistory(coinId: string) {
+  const endDate = Math.floor(Date.now() / 1000); // sec 필요
+  const startDate = endDate - (60*60*24*7*2);
+  return fetch(`${BASE_URL}/coins/${coinId}/ohlcv/historical?start=${startDate}&end=${endDate}`)
+    .then(res => res.json());
+}
+```
+* endDate: 현재를 세컨드로
+* startDate: 현재에서 2주일 전
+
+* 받아온 데이터 Coin.tsx에서 쓰기 위해 interface 설정
+```tsx
+interface IHistorical {
+  time_open: string;
+  time_close: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  market_cap: number;
+}
+
+function Chart({coinId}:ChartProps) {
+  const {isLoading, data} = useQuery<IHistorical[]>(["ohlcv", coinId], () => fetchCoinHistory(coinId));
+  return <h1>Chart</h1>;
+}
+```
+
+### Visualization
+#### Setup
+> npm install --save react-apexcharts apexcharts
+* APEXCHARTS 사용
+  + JS chart library
+  + <https://apexcharts.com>
+
+* import on Chart.tsx
+```tsx
+import ApexChart from "react-apexcharts";
+```
+
+#### Line chart 그리기
+```tsx
+<ApexChart
+  type="line"
+  series={[
+    {
+      name: "Opening Price",
+      data: data?.map((price => price.open)) ?? [],
+    },
+    {
+      name: "Closing Price",
+      data: data?.map((price => price.close)) ?? [],
+    },
+  ]}
+  options={{
+    chart: {
+      height: 300,
+      width: 500,
+      toolbar: { show: false },
+    },
+    grid: { show: false },
+    stroke: {
+      curve: "smooth",
+      width: 3,
+    },
+    xaxis: {
+      axisTicks: { show: false },
+      axisBorder: { show: false },
+      labels: { 
+        show: false,
+        datetimeFormatter: {month: "mmm 'yy"},
+      },
+      type: "datetime",
+      categories: data?.map((price) => price.time_close),
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        gradientToColors: ["teal", "yellow"],
+        stops: [0, 100],
+      }
+    },
+    colors: ["orange", "green"],
+    tooltip: {
+      y: {
+        formatter: (value) => `$ ${value.toFixed(2)}`,
+      }
+    }
+  }}/>
+```
+
+#### refetch
+* 데이터를 계속 업데이트하기 위해서
+* Coin.tsx
+```tsx
+const {isLoading: tickersLoading, data: tickersData} = useQuery<PriceData>(
+  ["tickers", coinId],
+  () => fetchCoinTickers(coinId),
+  { 
+    refetchInterval: 5000,
+  }
+);
+```
+* useQuery에 세번째 인자로 refetchInterval 함수를 넘겨줄 수 있다. 그러면 5초마다 데이터를 가져온다.
+
+## React helmet
+> npm i --save-dev @types/react-helmet
+* 브라우저 타이틀을 변경할 수 있다.
+```tsx
+<Helmet>
+  <title>{state?.name ? state.name : loading ? "Loading..." : infoData?.name}</title>
+</Helmet>
+```
