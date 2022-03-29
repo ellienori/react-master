@@ -1068,3 +1068,138 @@ const setIsDark = useSetRecoilState(isDarkAtom);
 ```tsx
 <button onClick={() => setIsDark(prev => !prev)}>Toggle Mode</button>
 ```
+
+## Practice: To Do List
+### Setup
+* App, index, theme만 남기고 모두 삭제
+* ToDoList.tsx 생성
+  + 되게 복잡하고 귀찮은 코딩을 함 (안쓸거임)
+  + form 하나로 이렇게나 긴 코드를 만들어야 함
+```tsx
+import { useState } from 'react';
+
+function ToDoList() {
+  const [toDo, setTodo] = useState("");
+  const [toDoError, setToDoError] = useState("");
+  const onChange = (event:React.FormEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    setTodo(value);
+  };
+  const onSubmit = (event:React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if(toDo.length < 10) {
+      return setToDoError("To do should be longer");
+    }
+    setToDoError("");
+    console.log("submit");
+  };
+  return (
+    <div>
+      <form onSubmit={onSubmit}>
+        <input onChange={onChange} value={toDo} placeholder="Write a to do" />
+        <button>Add</button>
+        {toDoError !== "" ? toDoError : null}
+      </form>
+    </div>
+  );
+}
+
+export default ToDoList;
+```
+
+### React Hook Form
+> npm install react-hook-form
+* 사용하기 쉬운 유효성 검사를 통해 성능이 뛰어나고 유연하며 확장 가능한 form
+```tsx
+import { useForm } from "react-hook-form";
+
+const { register, watch, handleSubmit, formState } = useForm();
+```
+
+#### register
+```tsx
+<input {...register("toDo")} placeholder="Write a to do" />
+```
+* register: name, onBlur, onChange, onClick, ref를 return하는 함수
+* ```{...register()}```라고 쓰면 register가 반환하는 객체를 input의 props으로 쓸 수 있다.
+
+```tsx
+<input {...register("toDo", {required: true, minLength: 10})} placeholder="Write a to do" />
+```
+* html 요소를 JS로도 관리할 수 있다
+
+#### watch
+```tsx
+console.log(watch());
+```
+* watch()를 출력하면 콘솔에 아래처럼 모든 변화를 지켜본다
+```bash
+{}
+ToDoList.tsx:6 {toDo: 'd'}
+ToDoList.tsx:6 {toDo: 'da'}
+ToDoList.tsx:6 {toDo: 'dan'}
+ToDoList.tsx:6 {toDo: 'danc'}
+ToDoList.tsx:6 {toDo: 'danci'}
+ToDoList.tsx:6 {toDo: 'dancin'}
+ToDoList.tsx:6 {toDo: 'dancing'}
+```
+
+#### handleSubmit
+```tsx
+<form onSubmit={handleSubmit(onValid,)}>
+```
+* form에 handleSubmit을 등록할 수 있다.
+  + 첫번째 인자는 값이 유효할 때 실행할 함수 (required)
+  + 두번쨰 인자는 값이 유효하지 않을 떄 실행할 함수
+* onValid
+```tsx
+
+```
+
+#### formState
+##### 그냥 formState만 import 했을 때
+```tsx
+console.log(formState.errors);
+```
+* formState.errors는 현재 에러에 대한 정보를 보여준다.
+* minLength를 지정해놓고 짤게 입력했을 때
+```bash
+{
+  toDo: {type: 'minLength', message: '', ref: input}
+}
+```
+* required인데 아무 것도 입력하지 않았을 때
+```bash
+{
+  toDo: {type: 'required', message: '', ref: input}
+}
+```
+* 에러를 좀 더 자세히 출력 하기 위해 아래처럼 메시지를 설정할 수도 있다.
+```tsx
+<input {...register("toDo", {
+  required: "To Do is required",
+  minLength: {
+    value: 5,
+    message: "You to do is too short."
+}})} placeholder="Write a to do" />
+```
+* __정규식__을 사용할 수도 있다.
+```tsx
+<input {...register("toDo", {
+  required: "To Do is required",
+  pattern: {
+    value: /^[A-Za-z0-9._%+-]+@naver.com$/,
+    message: "Only naver.com emails allowed",
+  },
+  minLength: {
+    value: 5,
+    message: "You to do is too short."
+}})} placeholder="Write a to do" />
+```
+
+##### formState: { errors }를 import 했을 때
+```tsx
+<span>
+  {errors?.toDo?.message}
+</span>
+```
