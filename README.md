@@ -1203,3 +1203,39 @@ console.log(formState.errors);
   {errors?.toDo?.message}
 </span>
 ```
+
+##### defaultValues
+* 디폴트 값 입력하기
+```tsx
+interface IForm {
+  email: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  password1: string;
+}
+
+function ToDoList() {
+  const { register, handleSubmit, formState: { errors }, } = useForm<IForm>({
+    defaultValues: {
+      email: "@naver.com",
+    },
+  });
+  // 생략
+```
+
+##### setError
+```tsx
+const onValid = (data: IForm) => {
+  if(data.password !== data.password1) {
+    setError("password1", { message: "Password are not the same. "});
+  }
+  // setError("extraError", { message: "Server offline" });
+};
+console.log(errors);
+```
+* error 출력 가능
+* 그 외에 진짜 온갖 거 다 함
+  + <https://react-hook-form.com/api/useform/register>
+
