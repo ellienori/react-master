@@ -1069,7 +1069,7 @@ const setIsDark = useSetRecoilState(isDarkAtom);
 <button onClick={() => setIsDark(prev => !prev)}>Toggle Mode</button>
 ```
 
-## Practice: To Do List
+## Practice: To Do List (개념 배우기)
 ### Setup
 * App, index, theme만 남기고 모두 삭제
 * ToDoList.tsx 생성
@@ -1162,7 +1162,7 @@ ToDoList.tsx:6 {toDo: 'dancing'}
 console.log(formState.errors);
 ```
 * formState.errors는 현재 에러에 대한 정보를 보여준다.
-* minLength를 지정해놓고 짤게 입력했을 때
+* minLength를 지정해놓고 짧게게 입력했을 때
 ```bash
 {
   toDo: {type: 'minLength', message: '', ref: input}
@@ -1239,3 +1239,185 @@ console.log(errors);
 * 그 외에 진짜 온갖 거 다 함
   + <https://react-hook-form.com/api/useform/register>
 
+### toDoState (atom)
+```tsx
+const toDoState = atom<IToDo[]>({
+  key: "toDo",
+  default: [],
+});
+```
+* atom 만들 때에는 꼭 __unique key__ 가 필요하다
+
+### atom 값 불러오기
+* 첫번째 방법
+```tsx
+const value = useRecoilValue(toDoState);
+const modifyFunction = useSetRecoilState(toDoState);
+```
+
+* 두번째 방법
+```tsx
+const [toDos, setToDos] = useRecoilState(toDoState);
+```
+
+### interface에서 카테고리 생성 하기
+* 선택지 제한 가능
+```tsx
+interface IToDo {
+  text: string;
+  id: number;
+  category: "TO_DO" | "DOING" | "DONE";
+}
+```
+
+### setToDos
+```tsx
+const handleValid = ({ toDo }: IForm) => {
+  setToDos((oldToDos) => [
+    { text: toDo, id: Date.now(), category: "TO_DO" },
+    ...oldToDos,
+  ]);
+  setValue("toDo", "");
+};
+```
+
+## Practice: To Do List (다시)
+### 리팩토링
+#### atoms.tsx에 toDoState 정의
+```tsx
+import { atom } from "recoil";
+
+export interface IToDo {
+  text: string;
+  id: number;
+  category: "TO_DO" | "DOING" | "DONE";
+}
+
+export const toDoState = atom<IToDo[]>({
+  key: "toDo",
+  default: [],
+});
+```
+* 관련 interface도 함께 만들어주고 둘다 export
+#### CreateToDo.tsx에 todo 입력하는 form 관련 코드 정리
+```tsx
+import { useForm } from "react-hook-form";
+import { useSetRecoilState } from "recoil";
+import { toDoState } from "../atoms";
+
+interface IForm {
+  toDo: string;
+}
+
+function CreateToDo() {
+  const setToDos = useSetRecoilState(toDoState);
+  const { register, handleSubmit, setValue } = useForm<IForm>();
+  const handleValid = ({ toDo }: IForm) => {
+    setToDos((oldToDos) => [
+      { text: toDo, id: Date.now(), category: "TO_DO" },
+      ...oldToDos,
+    ]);
+    setValue("toDo", "");
+  };
+
+  return (
+    <form onSubmit={handleSubmit(handleValid)}>
+        <input
+          {...register("toDo", {
+            required: "Please write a To Do",
+          })}
+          placeholder="Write a to do"
+        />
+        <button>Add</button>
+      </form>
+  );
+}
+
+export default CreateToDo;
+```
+* toDo 값을 직접 가져올 필요는 없고 Modifyer만 필요하기 때문에 setToDos만 __seSetRecoilState__ 로 생성한다.
+#### ToDo.tsx에는 todolist를 출력하는 li 관련 정리
+```tsx
+import { IToDo } from '../atoms';
+
+function ToDo({text}: IToDo) {
+  return (
+    <li>{text}</li>
+  );
+};
+
+export default ToDo;
+```
+* IToDo interface로 text의 형태를 알려준다
+
+#### ToDoList.tsx는 main
+```tsx
+import { useRecoilValue } from "recoil";
+import { toDoState } from "../atoms";
+import CreateToDo from "./CreateToDo";
+import ToDo from "./ToDo";
+
+function ToDoList() {
+  const toDos = useRecoilValue(toDoState);
+
+  return (
+    <div>
+      <h1>To Dos</h1>
+      <hr />
+      <CreateToDo />
+      <ul>
+        {toDos.map((toDo) => (
+          <ToDo key={toDo.id} {...toDo} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default ToDoList;
+```
+* ToDo 컴포넌트 불러 올 때 ```<ToDo text={toDo.text} category={toDo.category} id={toDo.id} />``` 이렇게 다 적으면 너무 기니까 ```<ToDo {...toDo} />```라고 적는다.
+  + toDos 배열의 toDo 원소 하나하나가 ToDo.tsx의 ToDo 컴포넌트에 필요한 props와 같은 모양이기 때문이다. (IToDo interface)
+
+### ToDo.tsx 기능 추가
+#### 1차 설계
+```tsx
+function ToDo({text, category}: IToDo) {
+  const onClick = (newCategory : IToDo["category"]) => {
+
+  }
+  return (
+    <li>
+      <span>{text}</span>
+      {category !== "DONE" && <button onClick={() => onClick("DONE")}>Done</button>}
+    </li>
+```
+* 각 todo 마다 버튼을 생성해서 버튼을 누르면 category의 값이 바뀐다.
+* 버튼에 onClick에 화살표 함수를 호출해서 그 안에 생성한 onClick 함수를 넣은 이유는 category 인자를 넘겨주기 위해서
+* 우리가 생성한 onClick 함수에 newCategory 파라미터에 타입이 IToDo의 category랑 같다는 것을 알려줌
+
+### 2차 설계
+* 버튼의 onClick에 onClick 함수를 넣어주고 인자를 받아오지 않는 대신 버튼에 name을 줘서 구분한다.
+```tsx
+{category !== "TO_DO" && <button name="TO_DO" onClick={onClick}>To Do</button>}
+```
+
+* ToDo의 버튼을 클릭할 때 어떤 ToDo 인지 정보를 알고 싶다 => targetIndex
+```tsx
+const onClick = (event:React.MouseEvent<HTMLButtonElement>) => {
+  const name = event.currentTarget.name;
+  setToDos(oldToDos => {
+    const targetIndex = oldToDos.findIndex(toDo => toDo.id === id);
+    const oldToDo = oldToDos[targetIndex];
+    const newToDo = {text, id, category: name as any};
+    console.log(oldToDo, newToDo);
+    return [
+      ...oldToDos.slice(0, targetIndex),
+      newToDo,
+      ...oldToDos.slice(targetIndex + 1),
+    ];
+  });
+}
+```
+  + newToDo를 생성할 때 text와 id는 그대로지만 category는 button name을 가져온다.
+  + return 할 때 앞 뒤 값 중간에 새 값을 넣는다.
