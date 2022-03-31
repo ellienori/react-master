@@ -1421,3 +1421,152 @@ const onClick = (event:React.MouseEvent<HTMLButtonElement>) => {
 ```
   + newToDo를 생성할 때 text와 id는 그대로지만 category는 button name을 가져온다.
   + return 할 때 앞 뒤 값 중간에 새 값을 넣는다.
+
+### Selectors
+* a piece of derived state
+  + derived state: the output of passing state to a pure function
+* atom의 output을 변형시키는 도구
+
+#### Selector function
+* atoms.tsx 보면 하나의 state로 3가지의 카테고리를 다루고 있다.
+* 근데 그렇다고 아톰을 3개나 만들고 싶지는 않아서 selector를 사용할 거다.
+
+##### 예시1 toDoList length 반환 하기
+* atoms.ts
+```tsx
+export const toDoSelector = selector({
+  key: "ToDoSelector",
+  get: ({get}) => {
+    return "hello";
+  },
+});
+```
+* selector에는 __key__ 와 __get 함수__ 가 필요하다.
+  + get 함수는 selector가 무슨 값을 반환할지 결정
+  + get 함수의 인자로 들어오는 {get}은 atom을 get 해오는 것
+* 그런데 왜 get을 ```{get}```으로 받아올까?
+  + options.get을 가져오기 때문에 options 생략한 거임
+
+* ToDoList.tsx
+```tsx
+const selectorOutput = useRecoilValue(toDoSelector);
+console.log("🐝", selectorOutput);
+```
+* __useRecoilValue__ 를 사용해서 값을 가져올 수 있다.
+* atom 값이 바뀌면 selectorOutput도 바뀐다.
+
+##### 예시2 category 출력
+* atoms.ts
+```tsx
+export const toDoSelector = selector({
+  key: "ToDoSelector",
+  get: ({get}) => {
+    const toDos = get(toDoState);
+    return [toDos.filter((todo) => todo.category === "TO_DO"),
+    toDos.filter((todo) => todo.category === "DOING"),
+    toDos.filter((todo) => todo.category === "DONE")];
+  },
+});
+```
+  + 배열 안에 각각의 배열을 넣어준다.
+* ToDoList.tsx
+```tsx
+const [toDos, doings, dones] = useRecoilValue(toDoSelector);
+return (
+  <div>
+    <h1>To Dos</h1>
+    <hr />
+    <CreateToDo />
+    <h2>To Do</h2>
+    <ul>
+      {toDos.map((task) => (
+        <ToDo key={task.id} {...task} />
+      ))}
+    </ul>
+    <hr />
+    <h2>Doing</h2>
+    <ul>
+      {doings.map((task) => (
+        <ToDo key={task.id} {...task} />
+      ))}
+    </ul>
+    <hr />
+    <h2>Done</h2>
+    <ul>
+      {dones.map((task) => (
+        <ToDo key={task.id} {...task} />
+      ))}
+    </ul>
+  </div>
+);
+```
+* 배열 값을 각각 출력하여 해당하는 카테고리에 해당 값만 출력한다.
+
+#### One by one
+* 저렇게 한번에 세 개 다 보여주는 것보다 하나씩 보여주자.
+* atom.ts
+```ts
+export const categoryState = atom<"TO_DO" | "DOING" | "DONE">({
+  key: "category",
+  default: "TO_DO",
+});
+
+export const toDoSelector = selector({
+  key: "ToDoSelector",
+  get: ({get}) => {
+    const toDos = get(toDoState);
+    const category = get(categoryState);
+    return toDos.filter((todo) => todo.category === category);
+  },
+});
+```
+* ToDoList.tsx
+```tsx
+function ToDoList() {
+  const toDos = useRecoilValue(toDoSelector);
+  const [category, setCategory] = useRecoilState(categoryState);
+  const onInput = (event:React.FormEvent<HTMLSelectElement>) => {
+    const value = event.currentTarget.value;
+    setCategory(value);
+  };
+  return (
+    <div>
+      <h1>To Dos</h1>
+      <hr />
+      <select value="{category}" onInput={onInput}>
+        <option value="TO_DO">To Do</option>
+        <option value="DOING">Doing</option>
+        <option value="DONE">Done</option>
+      </select>
+      <CreateToDo />
+      {toDos?.map((toDo) => (
+        <ToDo key={toDo.id} {...toDo} />
+      ))}
+    </div>
+  );
+}
+```
+
+* to do 입력할 때 무조건 TO_DO로 들어가는 데 그걸 수정하고 싶다.
+* CreateToDo.tsx
+```tsx
+const category = useRecoilValue(categoryState);
+const { register, handleSubmit, setValue } = useForm<IForm>();
+const handleValid = ({ toDo }: IForm) => {
+  setToDos((oldToDos) => [
+    { text: toDo, id: Date.now(), category },
+    ...oldToDos,
+  ]);
+```
+  + category 추가
+
+### Enums
+* atoms.ts에 생성해서 전체에서 ```Categories.TO_DO``` 처럼 쓴다.
+```tsx
+export enum Categories {
+  "TO_DO" = "TO_DO",
+  "DOING" = "DOING",
+  "DONE" = "DONE",
+}
+```
+  + 값을 지정해주지 않으면 0, 1, 2, ... 로 자동 할당 된다.
