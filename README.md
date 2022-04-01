@@ -1570,3 +1570,46 @@ export enum Categories {
 }
 ```
   + 값을 지정해주지 않으면 0, 1, 2, ... 로 자동 할당 된다.
+
+# TRELLO CLONE
+## Understanding Selectors
+### Get selectors
+* atoms.ts
+```tsx
+import { atom, selector } from "recoil";
+
+export const minuteState = atom({
+  key: "minutes",
+  default: 0,
+});
+
+export const hourSelector = selector({
+  key: "hours",
+  get: ({get}) => {
+    const minutes = get(minuteState);
+    return minutes / 60;
+  }
+})
+```
+* App.tsx
+```tsx
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { hourSelector, minuteState } from './atoms';
+
+function App() {
+  const [minutes, setMinutes] = useRecoilState(minuteState);
+  const hours = useRecoilValue(hourSelector);
+  const onMinutesChange = (event:React.FormEvent<HTMLInputElement>) => {
+    setMinutes(+event.currentTarget.value);
+  }
+  return (
+    <div>
+      <input value={minutes} onChange={onMinutesChange} type="number" placeholder='Minutes' />
+      <input value={hours} type="number" placeholder='Hours' />
+    </div>
+  );
+}
+
+export default App;
+```
+* ```setMinutes(+event.currentTarget.value);```에서 +를 붙인 이유는 value(string)를 number로 변환하기 위해서
