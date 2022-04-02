@@ -1633,4 +1633,187 @@ export const hourSelector = selector<number>({
 })
 ```
 * __set 함수__ 는 state를 set 하게 함, atom 수정하는 걸 도와줌
+* ```const [hours, setHours] = useRecoilState(hourSelector);```의 setHours는 selector의 set 함수를 불러온다.
 
+## Drang and Drop
+### Set up
+#### 설치
+```bash
+npm i react-beautiful-dnd
+npm i --save-dev @types/react-beautiful-dnd
+```
+#### 참고
+<https://www.npmjs.com/package/react-beautiful-dnd>
+<https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/about/installation.md>
+
+### DragDropContext
+* App.tsx
+```tsx
+import { DragDropContext } from "react-beautiful-dnd";
+
+function App() {
+  const onDragEnd = () => {
+
+  };
+  
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div>hello</div>
+    </DragDropContext>
+  );
+}
+
+export default App;
+```
+* 우리 앱 전체에 적용: 필요한 부분에만 하면 되는데 우리는 전체에 할 거야
+* 필수로 가져야하는 것
+  + ```onDragEnd```: Drag가 끝났을 때 실행되는 함수
+  + ```<span>hellow</span>```: children이 꼭 필요함
+
+### Understanding Draggable and Droppable
+* Draggable: 드래그 할 수 있는 요소
+* Droppable: 드래그 한 요소를 내려 놓을 수 있는 곳
+#### Droppable
+```tsx
+<div>
+  <Droppable droppableId="one">
+    {() => <ul></ul>}
+  </Droppable>
+</div>
+```
+* 무조건 ```droppableId```가 있어야 하고 children은 함수 형태여야 한다.
+
+#### Understanding Draggable
+```tsx
+<Droppable droppableId="one">
+  {() => (
+    <ul>
+      <Draggable draggableId="first" index={0}>
+        {() => <li>One</li>}
+      </Draggable>
+      <Draggable draggableId="second" index={1}>
+        {() => <li>Two</li>}
+      </Draggable>
+    </ul>
+  )}
+</Droppable>
+```
+* 무조건 ```draggableId```와 ```index```를 가져야 하고 children은 함수 형태여야 한다.
+
+### Props
+#### Droppable
+```tsx
+<Droppable droppableId="one">
+  {(provided) => (
+    <ul ref={provided.innerRef} {...provided.droppableProps}>
+```
+* ```provided```를 프롭으로 가져와서 ```...provided.droppableProps```를 적용함
+  + inspect로 봤을 때 새로운 props이 생겨있음
+    ```html
+    <ul data-rbd-droppable-id="one" data-rbd-droppable-context-id="1"><li>One</li><li>Two</li></ul>
+    ```
+
+### Draggable
+```tsx
+<ul ref={provided.innerRef} {...provided.droppableProps}>
+  <Draggable draggableId="first" index={0}>
+    {(magic) => (
+      <li ref={magic.innerRef} 
+        {...magic.draggableProps} 
+        {...magic.dragHandleProps}>
+        One
+      </li>
+    )}
+  </Draggable>
+  <Draggable draggableId="second" index={1}>
+    {(magic) => (
+      <li ref={magic.innerRef} 
+        {...magic.draggableProps} 
+        {...magic.dragHandleProps}>
+        Two
+      </li>
+    )}
+  </Draggable>
+</ul>
+```
+* 얘도 Droppable이랑 비슷하게 prop을 받아온다. 여기서는 ```magic```
+  + ```dragHandleProps```와 ```dragHandleProps```가 있다.
+* ```...magic.draggableProps```는 props 받아오는 걸 의미
+  + inspect로 살펴볼 수 있음
+* ```...magic.dragHandleProps```는 이 li가 핸들링하는데에 트리거 된다는 걸 의미
+```tsx
+<li ref={magic.innerRef} 
+  {...magic.draggableProps}>
+  <span {...magic.dragHandleProps}>🐝</span>
+  One
+</li>
+```
+* One 글자에서는 요소를 핸들링할 수 없고 벌로만 핸들링 할 수 있다.
+
+### Style
+* theme.ts 수정 -> styled.d.ts 수정
+* index.tsx에서도 없어진 props 수정해야함
+  + textColor를 black으로 변경
+
+### Board and Card
+* App.tsx
+```tsx
+const Wrapper = styled.div`
+  display: flex;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+`;
+
+const Boards = styled.div`
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(1, 1fr);
+`;
+
+const Board = styled.div`
+  padding: 20px 10px;
+  padding-top: 30px;
+  background-color: ${(props) => props.theme.boardColor};
+  border-radius: 5px;
+  min-height: 200px;
+`;
+
+const Card = styled.div`
+  border-radius: 5px;
+  margin-bottom: 5px;
+  padding: 10px 10px;
+  background-color: ${(props) => props.theme.cardColor};
+`;
+
+const toDos = ["a", "b", "c", "d", "e", "f"];
+```
+* 그리고 return에 생성했던 ```ul```을 ```Board```로 ```li```을 ```Card```로 변경한다.
+* Wrapper -> Boards -> Board -> Card 순으로 감싼다.
+
+```tsx
+<Droppable droppableId="one">
+  {(provided) => (
+    <Board ref={provided.innerRef} {...provided.droppableProps}>
+      {toDos.map((toDo, index) => (
+        <Draggable draggableId={toDo} index={index}>
+          {(magic) => (
+            <Card
+              ref={magic.innerRef}
+              {...magic.dragHandleProps}
+              {...magic.draggableProps}
+            >
+              {toDo}
+            </Card>
+          )}
+        </Draggable>
+      ))}
+      {provided.placeholder}
+    </Board>
+  )}
+</Droppable>
+```
+* ```<Board></Board>```의 끝에 ```{provided.placeholder}```를 추가하면 ```Card```를 Drag로 밖으로 빼도 ```Board```의 사이즈가 그대로 유지된다.
