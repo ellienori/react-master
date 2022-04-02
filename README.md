@@ -1817,3 +1817,79 @@ const toDos = ["a", "b", "c", "d", "e", "f"];
 </Droppable>
 ```
 * ```<Board></Board>```의 끝에 ```{provided.placeholder}```를 추가하면 ```Card```를 Drag로 밖으로 빼도 ```Board```의 사이즈가 그대로 유지된다.
+
+## atom
+* atoms.ts
+```ts
+import { atom } from "recoil";
+
+export const toDoState = atom({
+  key: "toDo",
+  default: ["a", "b", "c", "d", "e", "f"],
+});
+```
+  + ```const toDos = ["a", "b", "c", "d", "e", "f"];```를 atoms.ts로 옮겨 ```toDoState```를 생성한다.
+
+* App.tsx에서 위에서 생성한 atom을 부르기 위해 ```const [toDos, setToDos] = useRecoilState(toDoState);```를 추가한다.
+
+## onDragEnd
+```tsx
+const onDragEnd = ({draggableId, destination, source}: DropResult) => {
+  if (!destination) {
+    // 같은 자리에 내려 놓을 수도 있으니까
+    return;
+  }
+  setToDos((oldToDos) => {
+    const copyToDos = [...oldToDos];
+    // 1) Delete item on source.index
+    copyToDos.splice(source.index, 1);
+    // 2) Put back the item on the destination.index
+    copyToDos.splice(destination?.index, 0, draggableId);
+    return copyToDos;
+  });
+};
+```
+* source index를 지우고 걔를 destination에 넣는다.
+```tsx
+<Draggable key={toDo} draggableId={toDo} ....
+```
+  + ```Draggable```에서 ```key```와 ```draggableId```의 값은 같아야 한다.
+## Components/DraggableCard.tsx
+* DraggableCard 생성 후 props도 넘겨주고 interface도 생성하고 등등
+
+## 개선 => React Memo
+* DraggableCard 하나를 옮길 때마다 스쳐가는 모든 DraggableCard가 렌더링 된다. -> 깜빡깜빡 거림
+* __React Moemo__ 한테 prop이 바뀌지 않는다면 컴포넌트를 렌더링하지 말라고 말해주자
+* DraggableCard.tsx
+```tsx
+export default React.memo(DraggableCard);
+```
+
+## Multi Boards
+* 보드 여러 개로 세팅 하자
+### atoms.ts
+```ts
+import { atom } from "recoil";
+
+interface IToDoStage {
+  [key: string]: string[];
+}
+
+export const toDoState = atom<IToDoStage>({
+  key: "toDo",
+  default: {
+    "To Do": ["Cycling", "Dancing", "Reading"],
+    "In Progress": ["Studying", ],
+    "Done": ["Sleeping", "Running", ],
+  },
+});
+```
+* Components/Board.tsx 도 세팅 함
+
+### App.tsx
+* __onDragEnd()__ 를 새로 설정해야 함
+  + atom 값이 원래 array였다가 obj로 바뀌었기 때문에 바꿔야 함
+  + board가 같을 경우, 다를 경우 구분해서 수정해야 함
+```tsx
+
+```
