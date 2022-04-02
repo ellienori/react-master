@@ -303,7 +303,7 @@ interface PlayerShape {
 const sayHello = (playerObj:PlayerShape) => `Hello, ${playerObj.name}`;
 ```
 
-## interface를 optional 주기
+## interface에 option 주기
 ### interface에 물음표로 타입 설정
 ```tsx
 interface CircleProps {
@@ -441,7 +441,7 @@ function Router() {
   return (
     <BrowserRouter>
       <Switch>
-      <Route path="/:coinId">
+        <Route path="/:coinId">
           <Coin />
         </Route>
         <Route path="/">
@@ -827,7 +827,7 @@ const loading = infoLoading || tickersLoading;
 ```
 * ```isLoading: infoLoading```라고 쓰면 isLoading라는 값을 infoLoading라고 사용할 수 있다.
 * useQuery의 첫번째 인자는 array로 넘어가기 때문에 info와 tickers를 구분하기 위해 array에 coin id도 함께 넘겼다.
-* useQuery의 두번째 인자에는 함수를 넣어야하는데 이번에는 __coinId__ 라는 parameter를 넘겨주기 위해 함수 형태를 유지하기 위해 arrow function 형태로 넣었다.
+* useQuery의 두번째 인자에는 함수를 넣어야하는데 이번에는 __coinId__ 라는 parameter를 넘겨주고 함수 형태를 유지하기 위해 arrow function 형태로 넣었다.
 
 ## Chart
 ### Chart로 coinId 보내기
@@ -1120,7 +1120,12 @@ const { register, watch, handleSubmit, formState } = useForm();
 ```tsx
 <input {...register("toDo")} placeholder="Write a to do" />
 ```
-* register: name, onBlur, onChange, onClick, ref를 return하는 함수
+* register: __React ref__ 를 return하는 함수
+  + ```required```
+  + ```maxLength```
+  +```pattern```: regx 패턴으로 validation의 기준을 설정
+  + 등
+* register 함수에 넣는 인자는 __input 함수의 이름__ 이다.
 * ```{...register()}```라고 쓰면 register가 반환하는 객체를 input의 props으로 쓸 수 있다.
 
 ```tsx
@@ -1149,12 +1154,8 @@ ToDoList.tsx:6 {toDo: 'dancing'}
 <form onSubmit={handleSubmit(onValid,)}>
 ```
 * form에 handleSubmit을 등록할 수 있다.
-  + 첫번째 인자는 값이 유효할 때 실행할 함수 (required)
-  + 두번쨰 인자는 값이 유효하지 않을 떄 실행할 함수
-* onValid
-```tsx
-
-```
+  + 첫번째 인자는 값이 유효할 때 실행할 callback 함수 (required)
+  + 두번쨰 인자는 값이 유효하지 않을 떄 실행할 callback 함수
 
 #### formState
 ##### 그냥 formState만 import 했을 때
@@ -1162,7 +1163,7 @@ ToDoList.tsx:6 {toDo: 'dancing'}
 console.log(formState.errors);
 ```
 * formState.errors는 현재 에러에 대한 정보를 보여준다.
-* minLength를 지정해놓고 짧게게 입력했을 때
+* minLength를 지정해놓고 짧게 입력했을 때
 ```bash
 {
   toDo: {type: 'minLength', message: '', ref: input}
@@ -1183,7 +1184,7 @@ console.log(formState.errors);
     message: "You to do is too short."
 }})} placeholder="Write a to do" />
 ```
-* __정규식__을 사용할 수도 있다.
+* __정규식__ 을 사용할 수도 있다.
 ```tsx
 <input {...register("toDo", {
   required: "To Do is required",
@@ -1426,6 +1427,7 @@ const onClick = (event:React.MouseEvent<HTMLButtonElement>) => {
 * a piece of derived state
   + derived state: the output of passing state to a pure function
 * atom의 output을 변형시키는 도구
+* state를 가져다가 조금 변형해주는 함수
 
 #### Selector function
 * atoms.tsx 보면 하나의 state로 3가지의 카테고리를 다루고 있다.
@@ -1613,3 +1615,22 @@ function App() {
 export default App;
 ```
 * ```setMinutes(+event.currentTarget.value);```에서 +를 붙인 이유는 value(string)를 number로 변환하기 위해서
+* __selector의 get__ 은 state의 값을 가지고 올 수 있다.
+
+### Set selectors
+* atoms.ts
+```tsx
+export const hourSelector = selector<number>({
+  key: "hours",
+  get: ({get}) => {
+    const minutes = get(minuteState);
+    return minutes / 60;
+  },
+  set: ({set}, newValue) => {
+    const minutes = Number(newValue) * 60;
+    set(minuteState, minutes);
+  }
+})
+```
+* __set 함수__ 는 state를 set 하게 함, atom 수정하는 걸 도와줌
+
