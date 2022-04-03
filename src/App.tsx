@@ -40,6 +40,19 @@ function App() {
           [source.droppableId]: boardCopy,
         };
       });
+    } else {
+      // cross board movement
+      setToDos((allBoards) => {
+        const sourceBoardCopy = [...allBoards[source.droppableId]];
+        const destinationBoardCopy = [...allBoards[destination.droppableId]];
+        sourceBoardCopy.splice(source.index, 1);
+        destinationBoardCopy.splice(destination?.index, 0, draggableId);
+        return {
+          ...allBoards,
+          [source.droppableId]: sourceBoardCopy,
+          [destination.droppableId]: destinationBoardCopy
+        };
+      });
     }
   };
   

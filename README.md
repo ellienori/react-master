@@ -1891,5 +1891,53 @@ export const toDoState = atom<IToDoStage>({
   + atom 값이 원래 array였다가 obj로 바뀌었기 때문에 바꿔야 함
   + board가 같을 경우, 다를 경우 구분해서 수정해야 함
 ```tsx
-
+const onDragEnd = ({draggableId, destination, source}: DropResult) => {
+  if (!destination) {
+    // 같은 자리에 내려 놓을 수도 있으니까
+    return;
+  }
+  if (destination?.droppableId === source.droppableId) {
+    // same board movement.
+    setToDos((allBoards) => {
+      const boardCopy = [...allBoards[source.droppableId]];
+      boardCopy.splice(source.index, 1);
+      boardCopy.splice(destination?.index, 0, draggableId);
+      return {
+        ...allBoards,
+        [source.droppableId]: boardCopy,
+      };
+    });
+  } else {
+    // cross board movement
+    setToDos((allBoards) => {
+      const sourceBoardCopy = [...allBoards[source.droppableId]];
+      const destinationBoardCopy = [...allBoards[destination.droppableId]];
+      sourceBoardCopy.splice(source.index, 1);
+      destinationBoardCopy.splice(destination?.index, 0, draggableId);
+      return {
+        ...allBoards,
+        [source.droppableId]: sourceBoardCopy,
+        [destination.droppableId]: destinationBoardCopy
+      };
+    });
+  }
+};
 ```
+
+## Droppable Snapshot
+* 카드를 옮길 때 보드 색을 바꾸고 범위도 늘리기
+  + 범위 늘릴 때 ```flex-grow: 1;``` 추가
+```tsx
+const Area = styled.div<IAreaProps>`
+  background-color: ${(props) =>
+    props.isDraggingOver
+      ? "#dfe6e9"
+      : props.isDraggingFromThis
+      ? "#b2bec3"
+      : "transparent"};
+  flex-grow: 1;
+  transition: background-color 0.3s ease-in-out;
+  padding: 20px;
+`;
+```
+* 원래는 색 바꿀 때 ```a ? b : c```로 여러 색을 넣었는데 나는 transparent가 좋아서 ```background-color: "transparent";```로 줄임
