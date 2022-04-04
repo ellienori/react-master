@@ -1941,3 +1941,113 @@ const Area = styled.div<IAreaProps>`
 `;
 ```
 * 원래는 색 바꿀 때 ```a ? b : c```로 여러 색을 넣었는데 나는 transparent가 좋아서 ```background-color: "transparent";```로 줄임
+
+## reference
+* 우리의 react 코드를 이용해 html 요소를 지정하고 가져올 수 있는 방법
+  + 예전에 vanila js 사용할 때 ```a.click()```이나 ```video.play()``` 사용했잖아.
+  + reference는 react JS componenet를 통해서 HTML 요소를 가지고 올 수 있게 해준다.
+```tsx
+export function Board ({toDos, boardId}: IBoardProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onClick = () => {};
+  return (
+    <Wrapper>
+      <Title>{boardId}</Title>
+      <input ref={inputRef} placeholder="grab me" />
+      <button onClick={onClick}>click me</button>
+      <Droppable droppableId={boardId}>
+      {(provided, info) => (
+      // 생략
+```
+* ```<input ref={inputRef}```에 ref를 추가함으로써 우리는 input에 대한 접근을 할 수가 있다.
+  + ```document.getElementById``` 같은 거야
+
+## toDo 입력 받기
+### Set up Form
+* react-hook-form에서 useForms 사용
+* Board.tsx
+```tsx
+import { useForm } from "react-hook-form";
+
+const Form = styled.form`
+  width: 100%;
+`;
+
+interface IForm {
+  toDo: string;
+}
+
+export function Board ({toDos, boardId}: IBoardProps) {
+  const { register, setValue, handleSubmit } = useForm<IForm>();
+  const onValid = ({toDo}:IForm) => {
+    setValue("toDo", "");
+  }
+  return (
+    <Wrapper>
+      <Title>{boardId}</Title>
+      <Form onSubmit={handleSubmit(onValid)}>
+        <input 
+          {...register("toDo", { required: true })}
+          type="text" placeholder={`Add task on ${boardId}`} />
+      </Form>
+```
+  1. Form styled 생성
+  2. IForm 생성
+  3. useForm import 후 ```register```, ```setValue```, ```handleSubmit``` 호출
+  4. ```<Form></Form>``` 생성 후 ```...register``` 등록, onSubmit 함수 등록
+
+### Set up Atoms
+* toDo가 어떻게 생길지 새로 디자인 하자
+* Before
+```tsx
+interface IToDoStage {
+  [key: string]: string[];
+}
+```
+* After
+```tsx
+interface IToDo {
+  id: number;
+  text: string;
+}
+
+interface IToDoState {
+  [key: string]: IToDo[];
+}
+
+export const toDoState = atom<IToDoState>({
+  key: "toDo",
+  default: {
+    "To Do": [],
+    "In Progress": [],
+    "Done": [],
+  },
+});
+```
+* IToDoState는 기존에 그냥 string array 였으나 이제 IToDo 오브젝트를 가지는 array가 됨
+* 따라서 기존에 string array 였던 toDoState도 빈 배열로 바꿈
+* 그리고 나서 String을 렌더링하고 있던 앱 여기저기를 고쳐야 함
+
+### Board.tsx
+```tsx
+export function Board ({toDos, boardId}: IBoardProps) {
+  const setToDos = useSetRecoilState(toDoState);
+  const { register, setValue, handleSubmit } = useForm<IForm>();
+  const onValid = ({toDo}:IForm) => {
+    const newToDo = {
+      id: Date.now(),
+      text: toDo
+    };
+    setToDos(allBoards => {
+      return {
+        ...allBoards,
+        [boardId]: [
+          newToDo,
+          ...allBoards[boardId]
+        ]
+      }
+    })
+    setValue("toDo", "");
+  }
+```
+* ```useSetRecoilState(toDoState)```는 atom에 있는 ```toDoState```의 Setter를 가져오는 것
