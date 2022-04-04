@@ -2235,3 +2235,48 @@ function App() {
   );
 }
 ```
+
+### Forth: Drags
+* 우선 속박 없는 드래그
+```tsx
+<Box drag whileDrag={{backgroundColor:"rgb(255, 236, 130)"}} />
+```
+  + ```drag```를 사용하면 바로 드래그 할 수 있다.
+* 예제처럼 속박하기
+  + ```ref```: 내 코드로 특정 element를 잡을 수 있는 방법
+```tsx
+const BiggerBox = styled.div`
+  width: 300px;
+  height: 300px;
+  background-color: rgb(255, 255, 255, 0.4);
+  border-radius: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+`;
+
+const Box = styled(motion.div)`
+  width: 200px;
+  height: 200px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 30px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+function App() {
+  const biggerBoxRef = useRef<HTMLDivElement>(null);
+  return (
+    <Wrapper>
+      <BiggerBox ref={biggerBoxRef}>
+        <Box 
+          drag dragConstraints={biggerBoxRef}
+          dragSnapToOrigin
+          dragElastic={0.5}
+          whileDrag={{backgroundColor:"rgb(255, 236, 130, 0.4)"}} />
+      </BiggerBox>
+    </Wrapper>
+  );
+}
+```
+
