@@ -2199,3 +2199,39 @@ function App() {
 ```
 * ```variants``` prop을 사용
 * ```Box```랑 ```Circle```에 ```variants```만 지정해주고 ```start```와 ```end```는 이름이 똑같으니까 따로 지정 안해줌
+
+### Third: Gestures
+* 마우스 상태에 따른 몇몇 이벤트를 리스닝 하는 법
+```tsx
+function App() {
+  return (
+    <Wrapper>
+      <Box 
+        whileHover={{scale: 1.5, rotateZ: 90 }} 
+        whileTap={{ scale: 1, borderRadius: "100px"}} >
+      </Box>
+    </Wrapper>
+  );
+}
+```
+* ```whileHover```와 ```whileTab```이라는 prop 배움
+* 그런데 Variatns를 쓸거야
+```tsx
+const boxVariants = {
+  hover: {
+    scale: 1.5, rotateZ: 90
+  },
+  click: {
+    scale: 1, borderRadius: "100px"
+  }
+};
+
+function App() {
+  return (
+    <Wrapper>
+      <Box variants={boxVariants} whileHover="hover" whileTap="click" >
+      </Box>
+    </Wrapper>
+  );
+}
+```
