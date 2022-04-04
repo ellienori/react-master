@@ -2051,3 +2051,7 @@ export function Board ({toDos, boardId}: IBoardProps) {
   }
 ```
 * ```useSetRecoilState(toDoState)```는 atom에 있는 ```toDoState```의 Setter를 가져오는 것
+
+# ANIMATIONS
+## What is Framer Motion
+* reactJS library

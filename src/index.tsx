@@ -1,9 +1,9 @@
-import App from "./App";
-import { darkTheme } from './theme';
 import React from "react";
 import ReactDOM from "react-dom";
 import { RecoilRoot } from "recoil";
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from "styled-components";
+import App from "./App";
+import { darkTheme } from "./theme";
 
 import { createGlobalStyle } from "styled-components";
 
@@ -62,9 +62,9 @@ table {
 body {
   font-weight: 300;
   font-family: 'Source Sans Pro', sans-serif;
-  background-color:${(props) => props.theme.bgColor};
-  color: black;
+  color:black;
   line-height: 1.2;
+  background:linear-gradient(135deg,#BAD7DF,#FFE2E2);
 }
 a {
   text-decoration:none;
