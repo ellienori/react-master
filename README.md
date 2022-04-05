@@ -2280,3 +2280,147 @@ function App() {
 }
 ```
 
+### Fifth: Scroll
+#### Motion Value
+* 애니메이션의 수치를 트래킹 할 때 필요
+  + 좌표 등
+  + ```const x = useMotionValue(0);``` 생성
+* 그런데 이 값이 변경된다고 rendering 하지 않기 때문에 ```console.log```로 못찍어
+  + 그래서 ```useEffect```를 사용
+```tsx
+function App() {
+  const x = useMotionValue(0);
+  useEffect(() => {
+    x.onChange(() => console.log(x.get()))
+  }, [x]);
+  return (
+    <Wrapper>
+      <button onClick={() => x.set(200)} >click me</button>
+      <Box drag="x" dragSnapToOrigin
+        style={{x}} />
+    </Wrapper>
+  );
+}
+```
+
+#### useTransform
+* usetransform 사용해서 input, output을 주고 value를 조절할 수 있다.
+```tsx
+function App() {
+  const x = useMotionValue(0);
+  const potato = useTransform(x, [-400, 0, 300], [1.8, 1, 0.1]);
+  useEffect(() => {
+    potato.onChange(() => console.log(potato.get()))
+  }, [x]);
+  return (
+    <Wrapper>
+      <Box drag="x" dragSnapToOrigin
+        style={{x, scale:potato}} />
+    </Wrapper>
+  );
+}
+```
+
+* 굴리기도 가능
+```tsx
+function App() {
+  const x = useMotionValue(0);
+  const rotateZ = useTransform(x, [-300, 300], [-360, 360]);
+  useEffect(() => {
+    rotateZ.onChange(() => console.log(rotateZ.get()))
+  }, [x]);
+  return (
+    <Wrapper>
+      <Box drag="x" dragSnapToOrigin
+        style={{x, rotateZ}} />
+    </Wrapper>
+  );
+}
+```
+
+* 배경 색깔 바꾸기
+```tsx
+const Wrapper = styled(motion.div)`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Box = styled(motion.div)`
+  width: 200px;
+  height: 200px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 30px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+function App() {
+  const x = useMotionValue(0);
+  const rotateZ = useTransform(x, [-300, 300], [-360, 360]);
+  const gradient = useTransform(x, [-300, 300], 
+    [
+      "linear-gradient(135deg,#BAD7DF,#FFE2E2)",
+      "linear-gradient(135deg,#BAABDA,#FFD384)"
+    ]);
+  return (
+    <Wrapper style={{background: gradient}}>
+      <Box drag="x" dragSnapToOrigin
+        style={{x, rotateZ}} />
+    </Wrapper>
+  );
+}
+```
+
+#### useViewportScroll
+* 값 찍어보기
+```tsx
+useEffect(() => {
+  scrollY.onChange(() => {
+    console.log(scrollY.get(), scrollYProgress.get());
+  });
+}, [scrollY, scrollYProgress]);
+```
+* example
+```tsx
+import styled from "styled-components";
+import { motion, useMotionValue, useTransform, useViewportScroll } from "framer-motion";
+import { useEffect } from 'react';
+
+const Wrapper = styled(motion.div)`
+  height: 300vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Box = styled(motion.div)`
+  width: 200px;
+  height: 200px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 30px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+function App() {
+  const x = useMotionValue(0);
+  const rotateZ = useTransform(x, [-300, 300], [-360, 360]);
+  const gradient = useTransform(x, [-300, 300], 
+    [
+      "linear-gradient(135deg,#BAD7DF,#FFE2E2)",
+      "linear-gradient(135deg,#BAABDA,#FFD384)"
+    ]);
+  const { scrollYProgress } = useViewportScroll();
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 3]);
+  return (
+    <Wrapper style={{background: gradient}}>
+      <Box drag="x" dragSnapToOrigin
+        style={{x, rotateZ, scale}} />
+    </Wrapper>
+  );
+}
+
+export default App;
+```

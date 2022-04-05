@@ -1,24 +1,13 @@
 import styled from "styled-components";
-import { motion } from "framer-motion";
-import { useRef } from 'react';
+import { motion, useMotionValue, useTransform, useViewportScroll } from "framer-motion";
+import { useEffect } from 'react';
 
-const Wrapper = styled.div`
-  height: 100vh;
+const Wrapper = styled(motion.div)`
+  height: 300vh;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const BiggerBox = styled.div`
-  width: 300px;
-  height: 300px;
-  background-color: rgb(255, 255, 255, 0.4);
-  border-radius: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
 `;
 
 const Box = styled(motion.div)`
@@ -29,26 +18,20 @@ const Box = styled(motion.div)`
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
 `;
 
-const boxVariants = {
-  hover: {
-    scale: 1.5, rotateZ: 90
-  },
-  click: {
-    scale: 1, borderRadius: "100px"
-  }
-};
-
 function App() {
-  const biggerBoxRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const rotateZ = useTransform(x, [-300, 300], [-360, 360]);
+  const gradient = useTransform(x, [-300, 300], 
+    [
+      "linear-gradient(135deg,#BAD7DF,#FFE2E2)",
+      "linear-gradient(135deg,#BAABDA,#FFD384)"
+    ]);
+  const { scrollYProgress } = useViewportScroll();
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 3]);
   return (
-    <Wrapper>
-      <BiggerBox ref={biggerBoxRef}>
-        <Box 
-          drag dragConstraints={biggerBoxRef}
-          dragSnapToOrigin
-          dragElastic={0.5}
-          whileDrag={{backgroundColor:"rgb(255, 236, 130, 0.4)"}} />
-      </BiggerBox>
+    <Wrapper style={{background: gradient}}>
+      <Box drag="x" dragSnapToOrigin
+        style={{x, rotateZ, scale}} />
     </Wrapper>
   );
 }
