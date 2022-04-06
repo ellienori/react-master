@@ -2480,3 +2480,44 @@ function App() {
   );
 }
 ```
+
+## AnimatePresence
+### Understanding AnimatePresence
+* React JS App에서 사라지는 Component를 Animate 함
+* ```<AnimatePresence></AnimatePresence>``` 안 쪽에 나타나거나 사라지는 게 있다면 그것을 animate 하게 도와준다.
+* 참고로 AnimatePresence는 바깥 쪽으로 빠져야지 ```{}``` 안으로 들어가면 안된다. 항상 __visible__ 해야 한다.
+```tsx
+const boxVariants = {
+  initial: {
+    opacity: 0,
+    scale: 0
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotateZ: 360,
+  },
+  leaving: {
+    opacity: 0,
+    x: 200,
+  }
+};
+
+function App() {
+  const [showing, setShowing] = useState(false);
+  const toggleShowing = () => setShowing(prev => !prev);
+  return (
+    <Wrapper>
+      <button onClick={toggleShowing}>Click</button>
+      <AnimatePresence>{showing ? (
+        <Box variants={boxVariants} 
+          initial="initial" 
+          animate="visible" 
+          exit="leaving" />
+      ) : null}</AnimatePresence>
+    </Wrapper>
+  );
+}
+```
+
+### Slider
