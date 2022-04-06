@@ -2521,3 +2521,26 @@ function App() {
 ```
 
 ### Slider
+#### Custom
+* variants에 데이터를 보낼 수 있게 해주는 property
+* ```<Box custom={}>``` 이런 식으로 사용할 수 있다.
+  + ```<AnimatePresence custom={}>```에도 넣어야 함
+* custom을 적용하기 위해서는 variants를 함수 형태로 바꿔야 함
+
+#### variants 함수 형태
+* Before
+```tsx
+entry: {
+  x: 100,
+  opacity: 0,
+  scale: 0
+}
+```
+* After
+```tsx
+entry: (back: boolean) => ({
+  x: back ? -100 : 100,
+  opacity: 0,
+  scale: 0
+})
+```
