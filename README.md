@@ -2544,3 +2544,96 @@ entry: (back: boolean) => ({
   scale: 0
 })
 ```
+
+## Layout Animation
+### Understanding Layout
+* __layout__ 이라는 prop을 element에게 주면 그 element의 layout이 바뀔 때 자동으로 animate 된다.
+* ```<Circle layout />``` 이렇게 해당하는 element(compoenent)에 ```layout```이라고 넣어준다.
+* 클릭할 때마다 파란 공의 css가 animate 됨
+```tsx
+const Box = styled(motion.div)`
+  width: 300px;
+  height: 300px;
+  background-color: rgb(255, 255, 255, 1);
+  border-radius: 40px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+const Circle = styled(motion.div)`
+  background-color: #00a5ff;
+  height: 100px;
+  width: 100px;
+  border-radius: 50px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+function App() {
+  const [clicked, setClicked] = useState(false);
+  const toggleClicked = () => setClicked(prev => !prev);
+  return (
+    <Wrapper onClick={toggleClicked}>
+      <Box style={{
+        justifyContent: clicked ? "center" : "flex-start",
+        alignItems: clicked ? "center" : "flex-start"
+      }}>
+        <Circle layout />
+      </Box>
+    </Wrapper>
+  );
+}
+```
+
+### layoutId
+* 같은 layoutId를 주면 서로 다른 Component라도 같이 묶어서 animate 해준다.
+```tsx
+import styled from "styled-components";
+import { motion } from "framer-motion";
+import { useState } from 'react';
+
+const Wrapper = styled(motion.div)`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Box = styled(motion.div)`
+  width: 200px;
+  height: 200px;
+  background-color: rgb(255, 255, 255, 1);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+const Circle = styled(motion.div)`
+  background-color: #00a5ff;
+  height: 70px;
+  width: 70px;
+  border-radius: 50px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+function App() {
+  const [clicked, setClicked] = useState(false);
+  const toggleClicked = () => setClicked(prev => !prev);
+  return (
+    <Wrapper onClick={toggleClicked}>
+      <Box>
+        {!clicked ? <Circle layoutId="circle" style={{borderRadius: 50}} /> : null}
+      </Box>
+      <Box>
+        {clicked ? <Circle layoutId="circle" style={{borderRadius: 0, scale: 1.5}} /> : null}
+      </Box>
+    </Wrapper>
+  );
+}
+
+export default App;
+```

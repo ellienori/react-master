@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from 'react';
 
 const Wrapper = styled(motion.div)`
@@ -8,70 +8,38 @@ const Wrapper = styled(motion.div)`
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
 `;
 
 const Box = styled(motion.div)`
-  width: 70px;
-  height: 70px;
+  width: 200px;
+  height: 200px;
   background-color: rgb(255, 255, 255, 1);
-  border-radius: 8px;
-  top: 80px;
+  border-radius: 30px;
   display: flex;
-  position: absolute;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
 `;
 
-const boxVariants = {
-  entry: (back: boolean) => ({
-    x: back ? -100 : 100,
-    opacity: 0,
-    scale: 0
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 1,
-    },
-  },
-  exit: (back: boolean) => ({
-    x: back ? 100 : -100,
-    opacity: 0,
-    scale: 0,
-    transition: {
-      duration: 1,
-    },
-  })
-};
+const Circle = styled(motion.div)`
+  background-color: #00a5ff;
+  height: 70px;
+  width: 70px;
+  border-radius: 50px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
 
 function App() {
-  const [visible, setVisible] = useState(1);
-  const [back, setBack] = useState(false);
-  const sliderNext = () => {
-    setBack(false);
-    setVisible(prev => prev === 10 ? 1 : prev+1);
-  };
-  const sliderPrev = () => {
-    setBack(true);
-    setVisible(prev => prev === 1 ? 10 : prev-1);
-  };
+  const [clicked, setClicked] = useState(false);
+  const toggleClicked = () => setClicked(prev => !prev);
   return (
-    <Wrapper>
-      <AnimatePresence custom={back}>
-        <Box
-          custom={back}
-          variants={boxVariants} 
-          initial="entry" 
-          animate="center" 
-          exit="exit" key={visible}>{visible}</Box>
-      </AnimatePresence>
-      <button onClick={sliderNext}>NEXT</button>
-      <button onClick={sliderPrev}>PREV</button>
+    <Wrapper onClick={toggleClicked}>
+      <Box>
+        {!clicked ? <Circle layoutId="circle" style={{borderRadius: 50}} /> : null}
+      </Box>
+      <Box>
+        {clicked ? <Circle layoutId="circle" style={{borderRadius: 0, scale: 1.5}} /> : null}
+      </Box>
     </Wrapper>
   );
 }
