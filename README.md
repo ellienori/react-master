@@ -3068,3 +3068,212 @@ useEffect(() => {
 
  <Nav variants={navVariants} animate={navAnimation} initial={"top"}>
 ```
+
+## Home.tsx
+### Data 준비
+#### Data 가져오기
+* <https://www.themoviedb.org/>에 가입 후 api key 생성
+
+#### index.tsx
+* QueryClient, QueryClientProvider Set up
+```tsx
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const client = new QueryClient();
+
+ReactDOM.render(
+  <React.StrictMode>
+    <RecoilRoot>
+      <QueryClientProvider client={client}>
+        <ThemeProvider theme={theme}>
+          <GlobalStyle />
+          <App />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </RecoilRoot>
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+```
+
+#### Data 테스트
+* api.ts 
+```ts
+const API_KEY="내_api_key";
+const BASE_PATH="https://api.themoviedb.org/3";
+
+export function getMovies() {
+  return fetch(`${BASE_PATH}/movies/get-now-playing?api_key=${API_KEY}`)
+    .then(res => res.json());
+}
+```
+
+#### 넘어오는 데이터 확인
+* Home.tsx
+```tsx
+import { useQuery } from "react-query";
+import { getMovies } from '../api';
+
+function Home() {
+  const {data, isLoading} = useQuery(["movies", "nowPlaying"], getMovies);
+  console.log(data, isLoading);
+  return (
+    <div style={{backgroundColor: "whitesmoke", height: "200vh"}}></div>
+  );
+}
+
+export default Home;
+```
+
+### 메인에 큰 포스터 (Banner) 가져오기
+#### interface 추가
+* api.ts에서 ```IMovie```와 ```IGetMoviesResult``` Interface 생성 후 Home.tsx에서 nowPlaying 가져오는 ```useQuery<>()```에 추가한다.
+```tsx
+const {data, isLoading} = useQuery<IGetMoviesResult>(["movies", "nowPlaying"], getMovies);
+```
+
+#### Banner 출력
+* inext.tsx에서 GlobalStyle의 body 안에 color랑 background-color 색 바꿈
+* Banner 반환하면서 다른 슬라이더도 반환하고 싶기 때문에 Fragment를 반환한다. ```<></>```
+  + 많은 요소를 공통된 부모 없이 연이어서 리턴할 수 있는 방법
+* utilities.ts 생성 후 ```makeImagePath``` function 생성
+* __fallback__
+  + 어떤 이유에서인지 데이터가 오지 않으면 null을 보내라
+  + ```{(어쩌구 || "")}```
+* Home.tsx
+```tsx
+import { useQuery } from "react-query";
+import { getMovies, IGetMoviesResult } from '../api';
+import styled from "styled-components";
+import { makeImagePath } from '../utilities';
+
+const Wrapper = styled.div`
+  background: black;
+`;
+
+const Loader = styled.div`
+  height: 20vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Banner = styled.div<{bgPhoto:string}>`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1)),
+    url(${(props) => props.bgPhoto});
+  background-size: cover;
+`;
+
+const Title = styled.h2`
+  font-size: 48px;
+  margin-bottom: 20px; ;
+`;
+
+const Overview = styled.p`
+  font-size: 16px;
+  width: 50%;
+`;
+
+function Home() {
+  const {data, isLoading} = useQuery<IGetMoviesResult>(["movies", "nowPlaying"], getMovies);
+  return (
+    <Wrapper>{isLoading ? (
+      <Loader>Loading</Loader>
+    ) : (<>
+      <Banner bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}>
+        <Title>{data?.results[0].title}</Title>
+        <Overview>{data?.results[0].overview}</Overview>
+      </Banner>
+    </>)}</Wrapper>
+  );
+}
+
+export default Home;
+```
+
+### Slider
+* Slider, Row 생성
+  + 하나의 Slider에 Row 3줄을 넣자
+  + Row 하나에 영화 6개를 넣자
+  + 그렇다고 그 모든 내용을 다 렌더링 할 거는 아니고 key만 바꿔주자
+* AnimatePresence로 Row를 감싸자
+  + Slider -> AnimatePresence -> Row -> Box
+* Index system
+  + useState로 선언 후 Row에 key로 넘겨준다
+  + index가 변경되면서 새로운 Row가 출력되는 걸로 보여질 수 있다.
+* rowVariants 생성 후 Row에 적용
+* Row가 나오는 중에 또 클릭하면 겹쳐지는 이상한 문제 해결
+  + leaving, setLevaing
+  + ```<AnimatePresence onExitComplete={toggleLeaving}>```
+* 맨 처음에 이미 슬라이더가 나와있는 상태로 나오게 하고 싶어서 prop 추가 ```<AnimatePresence initial={false}```
+* offset: 6
+  + 6이 넘으면 다시 0으로 돌아간다
+```tsx
+const Wrapper = styled.div`
+  background: black;
+  padding-bottom: 200px;
+`;
+
+const Slider = styled.div`
+  position: relative;
+  top: -100px;
+`;
+
+const Row = styled(motion.div)`
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(6, 1fr);
+  position: absolute;
+  width: 100%;
+`;
+
+const Box = styled(motion.div)<{bgphoto: string}>`
+  background-color: white;
+  height: 200px;
+  background-image: url(${(props) => props.bgphoto});
+  background-size: cover;
+  background-position: center center;
+  font-size: 66px;
+`;
+
+const offset = 6;
+
+// 중략
+
+const [index, setIndex] = useState(0);
+const [leaving, setLeaving] = useState(false);
+const increaseIndex = () => {
+  if (data) {
+    if (leaving) return;
+    setLeaving(true);
+    const totalMovies = data.results.length - 1; // main에 하나 썼으니까 한개빼야함
+    const maxIndex = Math.floor(totalMovies / offset);
+    setIndex(prev => (prev === maxIndex ? 0 : prev+1));
+  }
+
+};
+const toggleLeaving = () => setLeaving(prev => !prev);
+
+const width = useWindowDimensions();
+
+// 중략
+
+<Slider>
+  <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
+    <Row
+      initial={{x: width+10}}
+      animate={{x:0}} exit={{x: -width-10}}
+      transition={{ type: "tween", duration: 1 }}
+      key={index}>
+      {data?.results.slice(1).slice(offset*index, offset*index+offset).map((movie) => (
+        <Box key={movie.id} bgphoto={makeImagePath(movie.backdrop_path, "w500")} />
+      ))}
+    </Row>
+  </AnimatePresence>
+</Slider>
+```
