@@ -3353,3 +3353,66 @@ const infoVariants = {
     </Info>
 </Box>
 ```
+
+### Movie Modal
+* Box 클릭 하면 더 큰 Card 처럼 나오는 거
+* onBoxClicked 함수 생성 후 Box에 넣기
+  + arg를 넘겨주기 위해서 arrow function 사용
+
+#### URL
+* url을 왔다갔다하기 위해 ```useHistory``` 사용
+* App.tsx에서 ```"/"```에 ```<Home />```을 Route 할 때 ```/movies/:movieId```도 출력할 수 있도록 path를 배열로 변경
+```tsx
+<Route path={["/", "/movies/:movieId"]}>
+```
+
+#### useRouteMatch
+* bigMovieMatch 생성
+  + 이 값이 null이면 아무값도 출력하지 않고 OBJ로 나오면 그 해당 값을 큰 카드로 출력하면 된다.
+  ```bash
+  // bigMovieMatch 출력하면
+  {
+    "path": "/movies/:movieId",
+    "url": "/movies/823625",
+    "isExact": true,
+    "params": {
+        "movieId": "823625"
+    }
+  }
+  ```
+* AnimatePresence 선언 후에 layoutId로 Box component와 연결
+  + string으로 만들기 ```layoutId={movie.id+""}```
+
+#### 배경 누르면 다시 상자가 들어가게 (Overlay)
+* BigMovie를 fragment로 감싸기
+* Overlay 생성 후 적용
+* 마우스 BigMovie 보기 위해 useViewportScroll 사용
+
+### Overlay에 포스터 이미지 넣기
+* clickedMovie 생성
+  + 클릭해서 movieId가 넘어왔을 경우 그 id로 data에서 데이터를 찾자
+  ```bash
+  // clickedMovie 출력하면 이렇게 나옴
+  {
+    "adult": false,
+    "backdrop_path": "/fOy2Jurz9k6RnJnMUMRDAgBwru2.jpg",
+    "genre_ids": [
+        16,
+        10751,
+        35,
+        14
+    ],
+    "id": 508947,
+    "original_language": "en",
+    "original_title": "Turning Red",
+    "overview": "Thirteen-year-old Mei is experiencing the awkwardness of being a teenager with a twist – when she gets too excited, she transforms into a giant red panda.",
+    "popularity": 6458.785,
+    "poster_path": "/qsdjk9oAKSQMWs0Vt5Pyfh6O4GZ.jpg",
+    "release_date": "2022-03-10",
+    "title": "Turning Red",
+    "video": false,
+    "vote_average": 7.5,
+    "vote_count": 1511
+  }
+  ```
+* BigCover, BigTitle, BigOverview 생성
