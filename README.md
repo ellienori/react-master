@@ -3416,3 +3416,165 @@ const infoVariants = {
   }
   ```
 * BigCover, BigTitle, BigOverview 생성
+```tsx
+const Box = styled(motion.div)<{bgphoto: string}>`
+  background-color: white;
+  height: 200px;
+  background-image: url(${(props) => props.bgphoto});
+  background-size: cover;
+  background-position: center center;
+  font-size: 66px;
+  cursor: pointer;
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
+`;
+
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+`;
+
+const BigMovie = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 80vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: ${(props) => props.theme.black.lighter};
+`;
+
+const BigCover = styled.div`
+  width: 100%;
+  background-size: cover;
+  background-position: center center;
+  height: 400px;
+`;
+
+const BigTitle = styled.h3`
+  color: ${(props) => props.theme.white.lighter};
+  padding: 20px;
+  font-size: 46px;
+  position: relative;
+  top: -80px;
+`;
+
+const BigOverview = styled.p`
+  padding: 20px;
+  position: relative;
+  top: -80px;
+  color: ${(props) => props.theme.white.lighter};
+`;
+
+// 중략
+
+// Movie Modal
+const history = useHistory();
+const onBoxClicked = (movieId:number) => {
+  history.push(`/movies/${movieId}`);
+}
+const bigMovieMatch = useRouteMatch<{movieId:string}>("/movies/:movieId");
+
+// Movie Modal Overlay
+const onOverlayClick = () => history.push("/");
+const { scrollY } = useViewportScroll();
+const clickedMovie = bigMovieMatch?.params.movieId && 
+  data?.results.find(movie => String(movie.id) === bigMovieMatch.params.movieId);
+
+  // 중략
+<AnimatePresence>
+  {bigMovieMatch ? (
+    <>
+      <Overlay 
+        onClick={onOverlayClick} 
+        exit={{ opacity: 0 }}
+        animate={{ opacity: 1 }} />
+      <BigMovie
+        style={{ top: scrollY.get() + 100 }}
+        layoutId={bigMovieMatch.params.movieId}>
+          {clickedMovie && (
+              <>
+                <BigCover
+                  style={{
+                    backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
+                      clickedMovie.backdrop_path,
+                      "w500"
+                    )})`,
+                  }}
+                />
+                <BigTitle>{clickedMovie.title}</BigTitle>
+                <BigOverview>{clickedMovie.overview}</BigOverview>
+              </>
+            )}
+      </BigMovie>
+    </>
+  ) : null}
+</AnimatePresence>
+```
+## React-hook-form
+### Search
+#### Header.tsx에서 작업
+* IForm 생성 후 ```useForm``` 사용해서 ```register, handleSubmit``` 호출
+  + ```<Input>```에 register 적용
+  + Search를 span에서 form으로 변경 후 ```<Search>```에 handleSubmit 적용
+* ```useHistory``` 사용해서 onValid 안에서 ```/search``` (route)로 이동시킴
+```tsx
+const Search = styled.form`
+  color: white;
+  display: flex;
+  align-items: center;
+  position: relative;
+  svg {
+    height: 25px;
+  }
+`;
+
+interface IForm {
+  keyword: string;
+}
+
+// 중략
+
+const {register, handleSubmit} = useForm<IForm>();
+const history = useHistory();
+const onValid = (data:IForm) => {
+  console.log(data);
+  history.push(`/search?keyword=${data.keyword}`);
+};
+
+// 중략
+
+<Search onSubmit={handleSubmit(onValid)}>
+  <motion.svg></motion.svg>
+  <Input
+    {...register("keyword", {required: true, minLength: 2})}
+    animate={inputAnimation}
+    initial={{ scaleX: 0 }}
+    transition={{ type: "linear" }}
+    placeholder="Search for movie or tv show." />
+</Search>
+```
+#### Search.tsx에서 작업
+* ```useLocation```으로 param 가져오기
+```tsx
+import { useLocation } from "react-router-dom";
+
+function Search() {
+  const location = useLocation();
+  const keyword = new URLSearchParams(location.search).get("keyword");
+  console.log(keyword);
+  return null;
+}
+
+export default Search;
+```
