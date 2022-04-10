@@ -3277,3 +3277,79 @@ const width = useWindowDimensions();
   </AnimatePresence>
 </Slider>
 ```
+
+### Box
+#### 포스터에 마우스 올리면 사진 확대되는지
+* 맨 앞이랑 마지막 포스터 짤리지 않게 확대 -> Box styled에서 ```transform-origin``` 설정
+
+#### 버튼 활성화
+* info 생성 후 Box 안에 넣기
+```tsx
+const Box = styled(motion.div)<{bgphoto: string}>`
+  background-color: white;
+  height: 200px;
+  background-image: url(${(props) => props.bgphoto});
+  background-size: cover;
+  background-position: center center;
+  font-size: 66px;
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
+`;
+
+const Info = styled(motion.div)`
+  padding: 10px;
+  background-color: ${(props) => props.theme.black.lighter};
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  h4 {
+    text-align: center;
+    font-size: 18px;
+  }
+`;
+
+const boxVariants = {
+  normal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -80,
+    transition: {
+      delay: 0.5,
+      duaration: 0.1,
+      type: "tween",
+    },
+  },
+};
+
+const infoVariants = {
+  hover: {
+    opacity: 0.7,
+    transition: {
+      delay: 0.5,
+      duaration: 0.1,
+      type: "tween",
+    },
+  },
+};
+
+// 중략
+
+<Box 
+  key={movie.id}
+  whileHover="hover"
+  initial="normal"
+  variants={boxVariants}
+  transition={{ type: "tween" }}
+  bgphoto={makeImagePath(movie.backdrop_path, "w500")}>
+    <Info variants={infoVariants}>
+      <h4>{movie.title}</h4>
+    </Info>
+</Box>
+```
