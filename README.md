@@ -2856,7 +2856,7 @@ export default Header;
 ### Logo Animation
 * Netflix 로고에 path animation을 주고 싶다.
 * framer-motion 사용
-* Logo 선언할 때 ```styled.svg``` -> ```styled(motion.svg)
+* Logo 선언할 때 ```styled.svg``` -> ```styled(motion.svg)```
 * Logo 사용할 때 ```<path d="어쩌구">``` -> ```<motion.path d="어쩌구">```
 * logoVariants 생성 후 ```normal```과 ```active``` 선언해서 ```whileHover``` 사용
 
@@ -2950,9 +2950,8 @@ const Circle = styled(motion.span)`
 
 ### Search Animation
 * 돋보기 누르면 검색창이 나오게
-* useState 사용 -> ```openSearch()```
-* useAnimation 사용
-  + ```Animation.start```
+* useState 사용 ```openSearch()```
+* useAnimation 사용 ```Animation.start```
 ```tsx
 import { useState } from "react";
 import { motion, useAnimation } from "framer-motion";
@@ -3022,8 +3021,7 @@ const toggleSearch = () => {
 ```
 
 ### Navigation Animation
-* scroll을 내리면 색을 바꾸고 싶어
-  + useViewportScroll 사용
+* scroll을 내리면 색을 바꾸고 싶어 -> __useViewportScroll__ 사용
 * Nav를 ```styled.nav``` -> ```styled(motion.nav)```로 변경 후 variant와 animation 적용
 ```tsx
 import { motion, useAnimation, useViewportScroll } from "framer-motion";
